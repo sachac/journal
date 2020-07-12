@@ -1,16 +1,10 @@
-.App {
-  text-align: center;
-}
-
+html { overflow-y: scroll;  }
+html body { letter-spacing: normal !important; }
+html body .MuiButton-root { letter-spacing: normal !important; }
+.App td { vertical-align: top; padding-bottom: 10px }
+.journal { text-align: left; }
 .App-logo {
   height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
 }
 
 .App-header {
@@ -25,14 +19,51 @@
 }
 
 .App-link {
-  color: #61dafb;
+  color: #09d3ac;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.react-calendar-heatmap .color-scale-0 {
+  fill: #eeeeee;
 }
+.react-calendar-heatmap .color-scale-1 {
+  fill: #DEEDCF;
+}
+.react-calendar-heatmap .color-scale-2 {
+  fill: #B8DEAA;
+}
+.react-calendar-heatmap .color-scale-3 {
+  fill: #88CE86;
+}
+.react-calendar-heatmap .color-scale-4 {
+  fill: #62BE73;
+}
+.search { width: 100%; height: 15px; }
+
+.dateEntries td { text-align: left; padding: 5px }
+.unlinkedPhotos img { margin: 8px; }
+.dateEntries tr { border-bottom: 1px solid lightgray }
+.dateEntries { border-collapse: collapse }
+
+.photoList img { height: 120px; margin: 8px; max-width: 200px }
+.dateSelector > button, .dateSelector input { padding: 10px }
+.newEntry textarea { width: 100%; height: 100px }
+.newEntry > button { font-size: large; padding: 10px }
+
+
+A.date-link { color: inherit; text-decoration: none }
+A.date-link:hover { text-decoration: underline }
+
+@media only screen and (min-width: 768px) {
+    html body {
+        font-size: 1.25rem;
+    }
+    .MuiSvgIcon-fontSizeSmall { font-size: 2rem }
+}
+
+.hasSelected .link { display: inline-block; position: relative; left: 0px }
+.hasSelected .entryItem:hover { background: darkgray }
+.link { display: none }
+.photoList { float: right; marginLeft: 5 }
+.large .photoList img { max-width: 100%; height: auto; max-height: 500px }
+
+.other { color: gray }
