@@ -15,6 +15,7 @@ import Settings from './pages/Settings';
 import Changes from './pages/Changes';
 import Random from './pages/Random';
 import Search from './pages/Search';
+import OnThisDay from './pages/OnThisDay';
 import PhotoDiary from './pages/PhotoDiary';
 import NavBar from './components/NavBar';
 import Uncategorized from './pages/Uncategorized';
@@ -30,6 +31,7 @@ const routes = [
     { path: '/day', name: 'Day', component: DayView, routePath: '/day/:dateParam?' },
     { path: '/month', name: 'Month', component: MonthView, routePath: '/month/:dateParam?' },
     { path: '/new', name: 'New', routePath: '/new/:dateParam?', component: EntryForm },
+    { path: '/onthisday', name: 'On this day', routePath: '/onthisday/:dateParam?', component: OnThisDay },
     { path: '/uncategorized', name: 'Uncategorized', component: Uncategorized },
     { path: '/incomplete', name: 'Incomplete', component: Incomplete },
     { path: '/changes', name: 'Changes', component: Changes },

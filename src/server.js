@@ -19,6 +19,27 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../build')));
 app.use('/thumbnails', express.static(process.env.PICS_DIR));
 app.use('/thumbnails', express.static(process.env.CAMERA_DIR));
+if (process.env.SKETCHES_DIR) {
+  app.use('/thumbnails', express.static(process.env.SKETCHES_DIR));
+  const findImageByFilename = async (filename) => {
+    let sketches = await fs.readdir(process.env.SKETCHES_DIR);
+    let id = filename.match(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][a-z]/);
+    let m = filename.match(/^[^#]+/);
+    if (id) {
+      return sketches.find((x) => x.startsWith(id));
+    } else if (m) {
+      return sketches.find((x) => x.startsWith(m[0]));
+    } else {
+      return null;
+    }
+  };
+  app.use('/thumbnails/:filename', async (req, res) => {
+    let filename = await findImageByFilename(req.params.filename);
+    if (filename) {
+      res.sendFile(path.join(process.env.SKETCHES_DIR, path.basename(filename)));
+    }
+  });
+};
 
 async function saveEntries(entries) {
     var changed = entries.filter((d) => { return d.Status; });
@@ -132,28 +153,35 @@ function getDaySpan(date) {
     }
 }
 
-async function getPhotos(params) {
-    let newFilter = {date: getDateParams(params)};
-    let list = await Picture.find(newFilter).exec();
-    let orig = await fs.readdir(process.env.CAMERA_DIR);
-    if (newFilter.date) {
-        orig = orig.filter((f) => {
-            let date = getDateFromFilename(f);
-            if (date) {
-                if (newFilter.date.$gte && date.isBefore(newFilter.date.$gte)) { return null; }
-                if (newFilter.date.$lt && date.isAfter(newFilter.date.$lt)) { return null; }
-                return true;
-            } else { return null; }
-        });
-    }
-    let origToAdd = [];
-    orig.forEach((f) => {
-        // Is it already in the existing list?
-        if (!list.find(e => e.filename == f)) {
-            origToAdd.push({filename: f, date: getDateFromFilename(f).toDate(), status: 'Draft'});
-        }
+async function maybeAddImages(oldList, directory, filter) {
+  if (!directory) { return oldList; }
+  let list = await fs.readdir(directory);
+  list = list.filter((f) => !f.match(/\.xmp$/));
+  if (filter.date) {
+    list = list.filter((f) => {
+      let date = getDateFromFilename(f);
+      if (date) {
+        if (filter.date.$gte && date.isBefore(filter.date.$gte)) { return null; }
+        if (filter.date.$lt && date.isAfter(filter.date.$lt)) { return null; }
+        return true;
+      } else { return null; }
     });
-    return list.filter(x => x.status != 'Deleted').concat(origToAdd);
+  }
+  list.forEach((f) => {
+    // Is it already in the existing list?
+    if (!oldList.find(e => e.filename == f)) {
+      oldList.push({filename: f, date: getDateFromFilename(f).toDate(), status: 'Draft'});
+    }
+  });
+  return oldList;
+}
+
+async function getPhotos(params) {
+  let filter = {date: getDateParams(params)};
+  let list = await Picture.find(filter).exec();
+  list = await maybeAddImages(list, process.env.CAMERA_DIR, filter);
+  list = await maybeAddImages(list, process.env.SKETCHES_DIR, filter);
+  return list.filter(x => x.status != 'Deleted');
 }
 
 async function getEntries(params) {
@@ -162,6 +190,12 @@ async function getEntries(params) {
     if (dateParams) { search['Date'] = dateParams; }
     let sort = {'Date': -1};
     let entries;
+    if (params.zidre) {
+        search['ZIDString'] = {$regex: new RegExp(params.zidre)};
+    }
+    if (params.zid) {
+        search['ZIDString'] = params.zid;
+    }
     if (params.withPhotos && params.withPhotos !== '0') {
         search['Pictures'] = {'$ne': ''};
     }
@@ -257,8 +291,20 @@ app.get('/api/entries', async (req, res) => {
   res.json(await getEntries(req.query));
 });
 
+function pad(n, width, z) {
+  z = z || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+app.get('/api/onThisDay/:month/:day?', async (req, res) => {
+    let re = '^[0-9]+-' + pad(parseInt(req.params.month), 2) + '-' +
+        (req.params.day ? pad(parseInt(req.params.day), 2, 0) : '[0-9][0-9]') + '-[0-9]+';
+    res.json(await getEntries({zidre: re}));
+});
+
 app.get('/api/entries.csv', async (req, res) => {
-  res.send(await fastCsv.writeToString(await getEntries(req.query), {columns: columns, transform: csvTransformer}));
+    res.send(await fastCsv.writeToString(await getEntries(req.query), {columns: columns, transform: csvTransformer, headers: columns, writeHeaders: true}));
 });
 
 app.get('/api/entries/random', async (req, res) => {
@@ -293,13 +339,18 @@ async function createPictureRecord(filename) {
 }
 
 function getDateFromFilename(filename) {
-    let digits = filename.replace(/[^0-9]/g, '');
-    if (digits.length >= 14 && digits.match(/^20/)) {
-        let date = moment(digits.substring(0, 14), 'YYYYMMDDHHmmss');
-        return date.isValid() && date;
-    } else {
-        return null;
-    }
+  let digits = filename.replace(/[^0-9]/g, '');
+  if (digits.length >= 14 && digits.match(/^20/)) {
+    let date = moment(digits.substring(0, 14), 'YYYYMMDDHHmmss');
+    return date.isValid() && date;
+  }
+  else if (digits.length >= 8 && digits.match(/^20/)) {
+    let date = moment(digits.substring(0, 8) + '120000', 'YYYYMMDDHHmmss');
+    return date.isValid() && date;
+  }
+  else {
+    return null;
+  }
 }
 
 async function preparePictureRecord(filename) {

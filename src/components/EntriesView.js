@@ -7,7 +7,7 @@ import Tab from '@material-ui/core/Tab';
 export default function EntriesView(data) {
     let entries;
 
-    const [ view, setView ] = useState('tree');
+    const [ view, setView ] = useState(data.view || 'tree');
     const handleChange = (e, newValue) => {
         setView(newValue);
     };
