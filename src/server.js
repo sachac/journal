@@ -13,12 +13,23 @@ const sharp = require('sharp');
 const columns = ["Note","Category","Pictures","Date","highlight week","Time","Link","ID","Status","Other", "ZID", "ZIDString"];
 const THUMBNAIL_WIDTH = 1000;
 const mongoose = require('mongoose');
-
+const imageDirs = (process.env.IMAGE_DIRS || '').split(';');
 // Serve the static files from the React app
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../build')));
-app.use('/thumbnails', express.static(process.env.PICS_DIR));
-app.use('/thumbnails', express.static(process.env.CAMERA_DIR));
+
+app.use('/thumbnails', express.static(process.env.THUMBNAILS_DIR));
+
+app.get('/thumbnails/:filename', async(req, res) => {
+    let f = await findOriginalPicture(req.params.filename);
+    if (f) {
+        res.sendFile(f);
+    } else {
+        res.send(404);
+    }
+});
+imageDirs.forEach((dir) => app.use('/thumbnails', express.static(dir)));
+
 if (process.env.SKETCHES_DIR) {
   app.use('/thumbnails', express.static(process.env.SKETCHES_DIR));
   const findImageByFilename = async (filename) => {
@@ -154,34 +165,38 @@ function getDaySpan(date) {
 }
 
 async function maybeAddImages(oldList, directory, filter) {
-  if (!directory) { return oldList; }
-  let list = await fs.readdir(directory);
-  list = list.filter((f) => !f.match(/\.xmp$/));
-  if (filter.date) {
+    if (!directory) { return oldList; }
+    let list = await fs.readdir(directory);
+    list = list.filter((f) => !f.match(/\.xmp$/));
     list = list.filter((f) => {
-      let date = getDateFromFilename(f);
-      if (date) {
-        if (filter.date.$gte && date.isBefore(filter.date.$gte)) { return null; }
-        if (filter.date.$lt && date.isAfter(filter.date.$lt)) { return null; }
-        return true;
-      } else { return null; }
+        let date = getDateFromFilename(f);
+        if (date) {
+            if (filter.date) {
+                if (filter.date.$gte && date.isBefore(filter.date.$gte)) { return null; }
+                if (filter.date.$lt && date.isAfter(filter.date.$lt)) { return null; }
+            }
+            return true;
+        } else { return null; }
     });
-  }
-  list.forEach((f) => {
-    // Is it already in the existing list?
-    if (!oldList.find(e => e.filename == f)) {
-      oldList.push({filename: f, date: getDateFromFilename(f).toDate(), status: 'Draft'});
+    list.forEach((f) => {
+        let date = getDateFromFilename(f);
+        // Is it already in the existing list?
+        if (!oldList.find(e => e.filename == f)) {
+            oldList.push({filename: f, date: date && date.toDate(), status: 'Draft'});
     }
   });
   return oldList;
 }
 
 async function getPhotos(params) {
-  let filter = {date: getDateParams(params)};
-  let list = await Picture.find(filter).exec();
-  list = await maybeAddImages(list, process.env.CAMERA_DIR, filter);
-  list = await maybeAddImages(list, process.env.SKETCHES_DIR, filter);
-  return list.filter(x => x.status != 'Deleted');
+    let filter = {date: getDateParams(params)};
+    let list = await Picture.find(filter).exec();
+    list = await imageDirs.reduce((prevPromise, dir) => {
+        return prevPromise.then(async (list) => {
+            return await maybeAddImages(list, dir, filter);
+        });
+    }, Promise.resolve(list));
+    return list.filter(x => x.status != 'Deleted');
 }
 
 async function getEntries(params) {
@@ -250,8 +265,7 @@ app.get('/api/date/:date/photos', async (req, res) => {
         unlinkedPhotos: unlinkedPhotos});
 });
 app.get('/api/photos', async (req, res) => {
-    let search = {Status: {$ne: 'Deleted'}, Date: getDateParams(req.query)};
-    let photos = await getPhotos(search);
+    let photos = await getPhotos(req.query);
     res.json(photos);
 });
 
@@ -368,7 +382,7 @@ async function preparePictureRecord(filename) {
 }
 
 async function updatePictureRecords() {
-    let files = await fs.readdir(process.env.PICS_DIR);
+    let files = await fs.readdir(process.env.THUMBNAILS_DIR);
     let list = (await Picture.find().exec()).map(f => f.filename);
     let newImages = files.filter(f => !list.includes(f) && !f.match(/.xmp$/));
     console.log('Creating picture records', newImages);
@@ -376,29 +390,62 @@ async function updatePictureRecords() {
     console.log('Done.');
 }
 
+async function findImageInDir(dir, filename) {
+    return fs.readdir(dir).then((sketches) => {
+        let id = filename.match(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][a-z]/);
+        let m = filename.match(/^[^#]+/);
+        let f = null;
+        if (id) {
+            f = sketches.find((x) => x.startsWith(id));
+        } else if (m) {
+            f = sketches.find((x) => x.startsWith(m[0]));
+        }
+        if (f) {
+            return path.join(dir, f);
+        } else {
+            return null;
+        }
+    });
+};
+
+async function findOriginalPicture(o) {
+    return imageDirs.reduce((prevPromise, cur) => {
+        return prevPromise.then((acc) => {
+            if (acc) return acc;
+            let f = findImageInDir(cur, o);
+            return f;
+        });
+    }, Promise.resolve(null));
+}
+
 async function makeThumbnail(o) {
-    return fs.access(process.env.PICS_DIR + path.basename(o))
+    return fs.access(process.env.THUMBNAILS_DIR + path.basename(o))
             .then(function() { })
-            .catch(function(err) {
+            .catch(async function(err) {
                 if (!o.match(/\.jpg$/)) return null;
                 console.log('Resizing ' + o);
-                return sharp(process.env.CAMERA_DIR + o, { failOnError: false })
-                    .resize(THUMBNAIL_WIDTH)
-                    .toFile(process.env.PICS_DIR + path.basename(o))
-                    .then(() => {
-                        return path.basename(o);
-                    }).catch((e) => {
-                        return null;
-                    });
+                let orig = await findOriginalPicture(o);
+                if (orig) {
+                    return sharp(orig, { failOnError: false })
+                        .resize(THUMBNAIL_WIDTH)
+                        .toFile(process.env.THUMBNAILS_DIR + path.basename(o))
+                        .then(() => {
+                            return path.basename(o);
+                        }).catch((e) => {
+                            return null;
+                        });
+                }
             });
 }
 
 async function makeThumbnails() {
-    console.log('Making thumbnails...');
-    var orig = await fs.readdir(process.env.CAMERA_DIR);
-    var list = orig.map(makeThumbnail);
+    let list = [];
+    imageDirs.forEach((dir) => {
+        fs.readdir(dir).then((files) =>  {
+            list = list.append(files.map(makeThumbnail));    
+        });
+    });
     await Promise.all(list);
-    console.log('Done making thumbnails.');
     return list.map((p) => { return p.value; }).filter(p => p);
 }
 
@@ -418,7 +465,6 @@ async function updateEntry(entry) {
     await Entry.findOneAndUpdate({ID: entry.ID}, entry, {upsert: true}).exec();
 }
 
-
 app.put('/api/entries/:id', async (req, res) => {
     var e = await Entry.findOne({ID: req.body.ID || req.params.id}).exec();
     let oldDate = moment(e.Date).format('YYYY-MM-DD');
@@ -426,7 +472,6 @@ app.put('/api/entries/:id', async (req, res) => {
     if (e.Pictures) {
         e.PictureList = [...new Set(e.Pictures.split(/,/))];
         // Make thumbnails if they don't exist
-        await Promise.all(e.PictureList.map(makeThumbnail));
         await Promise.all(e.PictureList.map(createPictureRecord));
     }
     if (e.Time) {
@@ -539,12 +584,6 @@ async function getPhotosFromDir(dir) {
     var deleted = (await Picture.find({status: 'Deleted'}).exec()).map(d => d.Filename);
     return list.filter(d => !deleted.includes(d));
 }
-
-app.post('/api/reload', async (req, res) => {
-    req.app.locals.photos = await getPhotosFromDir(process.env.PICS_DIR);
-    req.app.locals.fullsize = await getPhotosFromDir(process.env.CAMERA_DIR);
-    res.sendStatus(200);
-});
 
 app.post('/api/importIntoDB', async (req, res) => {
     await importEntriesIntoDB(await readEntriesFromFile(process.env.JOURNAL_FILE));
