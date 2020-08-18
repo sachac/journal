@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
@@ -6,6 +6,7 @@ import Masonry from 'react-masonry-css';
 import PhotoList from './PhotoList';
 import { Link } from 'react-router-dom';
 import './EntryWall.css';
+import EntryNote from '../components/EntryNote';
 import EditIcon from '@material-ui/icons/Edit';
 import InsertLinkIcon from '@material-ui/icons/InsertLink';
 import IconButton from '@material-ui/core/IconButton';
@@ -39,6 +40,11 @@ const useStyles = makeStyles(theme => ({
 function EntryCard(data) {
     const classes = useStyles();
     const entry = data.entry;
+    const [isEditing, setEditing] = useState(false);
+    let onSubmit = function() {
+        setEditing(false);
+        if (data.onSubmit) { data.onSubmit(); }
+    };
     const FeaturedImage = () => {
         if (entry.PictureList && entry.PictureList.length > 0) {
             return <CardMedia component="img" height="300" image={"/thumbnails/" + entry.PictureList[0]} />;
@@ -47,14 +53,17 @@ function EntryCard(data) {
         }
     };
     return (<Card key={entry.ID} className={classes.card}>
-              <CardHeader subheader={data.includeDate ? entry.ZIDString : ''} title={entry.Category || 'Uncategorized'} />
+              <CardHeader subheader={<Link to={'/zid/' + entry.ZIDString}>{data.includeDate ? entry.ZIDString : ''}</Link>} title={entry.Category || 'Uncategorized'} />
               <FeaturedImage />
               <CardContent>
-                <Typography variant="body2">{entry.Note}</Typography>
+                <Typography variant="body2">
+                  <div><EntryNote value={entry.Note}/></div>
+                  <div><EntryNote className="other" value={entry.Other}/></div>
+                </Typography>
               </CardContent>
               <PhotoList data={entry.PictureList && entry.PictureList.slice(1)} />
               <CardActions>
-            <IconButton to={"/entries/" + entry.ID} component={Link}><EditIcon fontSize="small"/></IconButton>
+                <IconButton to={"/entries/" + entry.ID} component={Link}><EditIcon fontSize="small"/></IconButton>
                 <IconButton onClick={(e) => data.onEntryLink && data.onEntryLink(e, entry)}><InsertLinkIcon fontSize="small"/></IconButton>
             </CardActions>
             </Card>
