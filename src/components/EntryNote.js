@@ -2,7 +2,7 @@ import React from 'react';
 
 function markupLinks(s) {
     if (!s) return null;
-    let v = s.replace(/(\b|^)(#[^ \t\r\n]+|ref:[0-9]+[0-9]+[0-9]+[0-9]+-[0-9]+[0-9]+-[0-9]+[0-9]+-[0-9]+[0-9]+)(\b|$)/g,
+    let v = s.replace(/(?<=^|[ \t\r\n])(#[^ \t\r\n]+|ref:[0-9]+[0-9]+[0-9]+[0-9]+-[0-9]+[0-9]+-[0-9]+[0-9]+-[0-9]+[0-9]+)(?=$|[ \t\r\n])/g,
                       function(x) {
                           let m = x.match(/^ref:(.*)/);
                           if (m) {
