@@ -13,7 +13,7 @@ const sharp = require('sharp');
 const columns = ["Note","Category","Pictures","Date","highlight week","Time","Link","ID","Status","Other", "ZID", "ZIDString"];
 const THUMBNAIL_WIDTH = 1000;
 const mongoose = require('mongoose');
-const imageDirs = (process.env.IMAGE_DIRS || '').split(';');
+const imageDirs = (process.env.IMAGE_DIRS || '').split(':');
 // Serve the static files from the React app
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../build')));

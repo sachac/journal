@@ -51,6 +51,16 @@ export default function EntryForm(props) {
         else if (props.id && !props.entry) fetchEntry(props.id);
     }, [idParam, props.id]);
     useEffect(() => { if (props.entry) setEntry(props.entry); }, [props.entry]);
+    const fetchEntryByZID = (id) => {
+        fetch('/api/entries?zid=' + id)
+            .then((res) => res.json())
+            .then((data) => { data && data[0] && setEntry(data[0]); });
+    };
+    useEffect(() => {
+        if (props.ZIDString) {
+            fetchEntryByZID(props.ZIDString); 
+        }
+    }, [props.ZIDString]);
     const fetchEntry = (id) => {
         fetch('/api/entries/' + id)
             .then((res) => res.json())

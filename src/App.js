@@ -15,6 +15,8 @@ import Settings from './pages/Settings';
 import Changes from './pages/Changes';
 import Random from './pages/Random';
 import Search from './pages/Search';
+import TagView from './pages/TagView';
+import ZIDView from './pages/ZIDView';
 import OnThisDay from './pages/OnThisDay';
 import PhotoDiary from './pages/PhotoDiary';
 import NavBar from './components/NavBar';
@@ -28,6 +30,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 const routes = [
     { path: '/', name: 'Random', component: Random, exact: true },
     { path: '/photoEntries', name: 'With photos', component: PhotoDiary },
+    { path: '/tag', name: 'Tag', component: TagView, routePath: '/tag/:tagParam?' },
+    { path: '/zid', name: 'ZID', component: ZIDView, routePath: '/zid/:zidParam' },
     { path: '/day', name: 'Day', component: DayView, routePath: '/day/:dateParam?' },
     { path: '/month', name: 'Month', component: MonthView, routePath: '/month/:dateParam?' },
     { path: '/new', name: 'New', routePath: '/new/:dateParam?', component: EntryForm },
