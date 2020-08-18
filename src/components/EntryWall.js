@@ -38,7 +38,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-function EntryCard(data) {
+export function EntryCard(data) {
     const classes = useStyles();
     const [entry, setEntry] = useState(data.entry);
     useEffect(() => { setEntry(data.entry); }, [data.entry]);
