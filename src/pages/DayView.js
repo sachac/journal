@@ -52,12 +52,12 @@ export default function DayView() {
     };
     const [ selected, setSelected ] = useState([]);
     const [ lastEntry, setLastEntry ] = useState();
-
     
     const handlePhotoClick = (e, p) => {
         setSelected((selected.includes(p)) ? selected.filter(d => d !== p) : selected.concat(p));
     };
-    const handleEntryLink = (event, entry) => {
+    
+    const handleEntryClick = (event, entry) => {
         if (selected.length > 0) {
             fetch('/api/entries/' + entry.ID + '/pictures', {
                 method: 'POST',
@@ -95,7 +95,7 @@ export default function DayView() {
     };
 
     const handleSameAsPrevious = (e) => {
-        handleEntryLink(null, lastEntry);
+        handleEntryClick(null, lastEntry);
     };
 
     let zoomPhotos = <div/>;
@@ -109,7 +109,7 @@ export default function DayView() {
           <DateSelector value={date} onChange={onChange} />
           <PhotoList scroll onDelete={handlePhotoDelete} onClick={handlePhotoClick} data={data.unlinkedPhotos} selected={selected} />
           <OtherActions selected={selected}/>
-          <EntriesView entries={data.entries} onEntryLink={handleEntryLink} />
+          <EntriesView entries={data.entries} onEntryClick={handleEntryClick} />
           <DateSelector value={date} onChange={onChange} />
           <OtherActions selected={selected}/>
           <EntryForm date={date} quick onSubmit={onQuickEntry} photos={selected}/>

@@ -39,6 +39,32 @@ export default function Search() {
         if (event.target.name === 'isRegexp') { setIsRegexp(event.target.checked); }
         if (event.target.name === 'withPhotos') { setWithPhotos(event.target.checked); }
     };
+    const [ selected, setSelected ] = useState(null);
+    const handleEntryClick = (e, entry) => {
+        if (!selected) {
+            setSelected(entry);
+        } else if (selected.ID == entry.ID) {
+            setSelected(null);
+        } else {
+            // Link them up
+            let from, to;
+            if (selected.ZIDString < entry.ZIDString) {
+                from = entry;
+                to = selected;
+            } else {
+                from = selected;
+                to = entry;
+            }
+            // fetch('/api/entries/zid/' + from.ZIDString + '/links/' + to.ZIDString, {
+            //     method: 'POST',
+            //     headers: {'Content-Type': 'application/json'}}).then((result) => {
+            //         console.log(result);
+            //         if (result) {
+            //             selected.Other = result.Other;
+            //         }
+            //     });
+        }
+    };
     const getData = (event) => {
         event.preventDefault();
         if (!query) return null;
@@ -61,7 +87,7 @@ export default function Search() {
             <FormControlLabel control={<Checkbox value={withPhotos} onChange={handleChange} name="withPhotos" />} label="Only with photos" />
             <IconButton type="submit"><SearchIcon/></IconButton> {message}
           </form>
-          <EntriesView entries={entries}/>
+          <EntriesView entries={entries} onClick={handleEntryClick}/>
           
         </div>
     );

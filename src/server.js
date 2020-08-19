@@ -551,7 +551,20 @@ async function linkPictures(id, filenames) {
         return null;
     }
 }
-
+async function linkEntry(entry, newZID) {
+    entry.Other = entry.Other + "\nref:" + newZID; 
+    return entry.save();
+}
+app.post('/api/entries/zid/:zid/links/:toZID', async (req, res) => {
+    let result = await linkEntry(await getEntryByZID(req.params.zid), req.params.toZID);
+    if (result) { res.json(result); }
+    else { res.send(500); }
+});
+app.post('/api/entries/zid/:zid/links', async (req, res) => {
+    let result = await linkEntry(await getEntryByZID(req.params.zid), req.body.ZIDString);
+    if (result) { res.json(result); }
+    else { res.send(500); }
+});
 app.post('/api/entries/:id/pictures', async (req, res) => {
     let result = await linkPictures(req.params.id, req.body.filename ? [req.body.filename] : req.body.filenames);
     if (result) { res.json(result); }
