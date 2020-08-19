@@ -3,6 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Button from '@material-ui/core/Button';
 import EntryItem from '../components/EntryItem';
 import EntriesView from '../components/EntriesView';
+import Grid from '@material-ui/core/Grid';
 
 import { DatePicker } from '@material-ui/pickers';
 import moment from 'moment';
@@ -20,31 +21,33 @@ export default function ZIDView(data) {
     const fetchEntryByZID = (id) => {
         id = id.replace(/[^-0-9]/g, '');
         if (id) {
-            fetch('/api/entries?zid=' + id)
-                .then((res) => res.json())
-                .then((data) => {
-                    data && data[0] && setEntry(data[0]);
-                    let m = data[0].Other.match(/(?<=^|[ \t\r\n])ref:[0-9]+[0-9]+[0-9]+[0-9]+-[0-9]+[0-9]+-[0-9]+[0-9]+-[0-9]+[0-9]+(?=$|[ \t\r\n])/g);
-                    let re = m.map((o) => o.replace('ref:', '')).join('|');
-                    fetch('/api/entries?zidre=' + re)
-                        .then((res) => res.json())
-                        .then((data) => { setForwardLinks(data); });
-                });
-            fetch('/api/entries?regex=1&q=ref:' + id)
-                .then((res) => res.json())
-                .then((data) => { setBacklinks(data); });
+            setBacklinks([]);
+            setForwardLinks([]);
+            fetch('/api/entries/zid/' + id).then((res) => res.json())
+                .then((data) => { data && setEntry(data); });
+            fetch('/api/entries/zid/' + id + '/links').then((res) => res.json())
+                .then(setForwardLinks);
+            fetch('/api/entries/zid/' + id + '/backlinks').then((res) => res.json())
+                .then(setBacklinks);
         }
     };
     
     useEffect(() => { fetchEntryByZID(zidParam); }, [zidParam]);
     if (entry) {
-        return <div>
-                 <EntryCard includeDate={true} entry={entry}/>
-                 <h2>Entries that link to this</h2>
-                 <EntriesView entries={backlinks} view="cards"/>
-                 <h2>Entries linked from this</h2>
-                 <EntriesView entries={forwardLinks} view="cards"/>
-                                  
+        return <div className="zid-view">
+        <Grid container spacing={3}>
+        <Grid item sm>
+        <EntryCard includeDate={true} entry={entry}/>
+        </Grid>
+        <Grid item sm>
+        <h2>Entries that link to this</h2>
+          {backlinks.map((entry) => { return <EntryCard includeDate={true} key={entry.ID} entry={entry}/>; })}
+        </Grid>
+        <Grid item sm>
+          <h2>Entries linked from this</h2>
+          {forwardLinks.map((entry) => { return <EntryCard includeDate={true} key={entry.ID} entry={entry}/>; })}
+        </Grid>
+        </Grid>
                </div>;
     } else {
         return <div/>;

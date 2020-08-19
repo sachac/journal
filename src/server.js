@@ -339,6 +339,42 @@ app.get('/api/entries/incomplete', async (req, res) => {
     res.json(entries);
 });
 
+function getEntryByZID(zidString) {
+    return Entry.findOne({ZIDString: zidString, Status: {$ne: 'Deleted'}}).exec();;
+}
+
+function getBackwardLinks(entry) {
+    if (!entry) { return []; }
+    return getEntries({q: 'ref:' + entry.ZIDString, regex: true});
+}
+
+function getForwardLinks(entry) {
+    if (!entry) { return []; }
+    if (!entry.Other) { return []; }
+    let m = entry.Other.match(/(?<=^|[ \t\r\n])ref:[0-9]+[0-9]+[0-9]+[0-9]+-[0-9]+[0-9]+-[0-9]+[0-9]+-[0-9]+[0-9]+(?=$|[ \t\r\n])/g);
+    if (!m) return [];
+    let re = m.map((o) => o.replace('ref:', '')).join('|');
+    return getEntries({zidre: re});
+}
+
+app.get('/api/entries/zid/:zidString/links', async (req, res) => {
+    getEntryByZID(req.params.zidString).then(getForwardLinks).then((data) => { res.json(data); });
+});
+
+app.get('/api/entries/zid/:zidString/backlinks', async (req, res) => {
+    getEntryByZID(req.params.zidString).then(getBackwardLinks).then((data) => { res.json(data); });
+});
+
+app.get('/api/entries/zid/:zidString', async (req, res) => {
+    getEntryByZID(req.params.zidString).then(function(entry) {
+        if (entry) {
+            res.json(entry);
+        } else {
+            res.sendStatus(404);
+        }
+    });
+});
+
 app.get('/api/entries/:id', async (req, res) => {
     if (req.params.id.match(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/)) {
         res.json(await Entry.findOne({ZIDString: req.params.id}).exec());
