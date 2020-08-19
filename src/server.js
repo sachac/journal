@@ -552,13 +552,22 @@ async function linkPictures(id, filenames) {
     }
 }
 async function linkEntry(entry, newZID) {
+  if (!entry.Other.match('ref:' + newZID)) {
     entry.Other = entry.Other + "\nref:" + newZID; 
     return entry.save();
+  } else {
+    return entry;
+  }
 }
 app.post('/api/entries/zid/:zid/links/:toZID', async (req, res) => {
-    let result = await linkEntry(await getEntryByZID(req.params.zid), req.params.toZID);
+  let entry = await getEntryByZID(req.params.zid);
+  if (entry) {
+    let result = await linkEntry(entry, req.params.toZID);
     if (result) { res.json(result); }
     else { res.send(500); }
+  } else {
+    res.sendStatus(404);
+  }
 });
 app.post('/api/entries/zid/:zid/links', async (req, res) => {
     let result = await linkEntry(await getEntryByZID(req.params.zid), req.body.ZIDString);

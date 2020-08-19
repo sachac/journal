@@ -27,13 +27,13 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-function CategoryList(data) {
+function CategoryTree(data) {
     const classes = useStyles();
     return <li>
              <div className={classes.category}>{data.category}</div>
              <ul className={classes.items}>
                {data.entries.map((entry, key) => {
-                   return <li key={key}><EntryItem entry={entry} onEntryLink={data.onEntryLink} onSubmit={data.onSubmit} /></li>;
+                   return <li key={key}><EntryItem entry={entry} onClick={data.onClick} onSubmit={data.onSubmit} selected={data.selected} /></li>;
                })}
              </ul>
            </li>;
@@ -46,12 +46,12 @@ export default function EntryTree(data) {
         setByCategory(Object.entries(groupBy(data.entries, e => e.Category || 'Uncategorized')));  
     }, [data, data.entries]);
     if (data.sort === 'category') {
-        return <ul className={classes.root}>{byCategory.map((e) => <CategoryList key={e[0]} category={e[0]} entries={e[1]} onSubmit={data.onSubmit} onEntryLink={data.onEntryLink} />)}</ul>;        
+        return <ul className={classes.root}>{byCategory.map((e) => <CategoryTree key={e[0]} selected={data.selected} category={e[0]} entries={e[1]} onSubmit={data.onSubmit} onClick={data.onClick} />)}</ul>;        
     } else {
         if (data.entries) {
             return <ul className={classes.root}>{
                 data.entries.map((e, k) => {
-                    return <li key={k}><EntryItem entry={e} onEntryLink={data.onEntryLink} onSubmit={data.onSubmit} /></li>;
+                    return <li key={k}><EntryItem entry={e} onClick={data.onClick} onSubmit={data.onSubmit} selected={data.selected} /></li>;
                 })}</ul>;
         } else {
             return null;

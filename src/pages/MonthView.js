@@ -5,7 +5,7 @@ import Button from '@material-ui/core/Button';
 import PhotoList from '../components/PhotoList';
 import history from "../history";
 import { DatePicker } from '@material-ui/pickers';
-import EntryTree from '../components/EntryTree';
+import EntriesView from '../components/EntriesView';
 import { Link, useParams } from "react-router-dom";
 import moment from 'moment';
 
@@ -18,6 +18,7 @@ export default function MonthView() {
   const { dateParam } = useParams();
   const [ data, setData ] = useState({});
   const [ date, setDate ] = useState(dateParam ? new Date(dateParam + '-15') : new Date());
+  const [ selectedEntries, setSelectedEntries ] = useState([]);  
   const previousMonth = () => {
     setDate(addMonths(date, -1));
   };
@@ -30,6 +31,17 @@ export default function MonthView() {
   useEffect(() => {
     history.push('/month/' + moment(date).format('YYYY-MM'));
   }, [date]);
+
+  const clickEntry = (event, entry) => {
+    let index = selectedEntries.indexOf(entry.ZIDString);
+    if (index == -1) {
+      selectedEntries.push(entry.ZIDString);
+    } else {
+      selectedEntries.splice(index, 1);
+    }
+    setSelectedEntries([...selectedEntries]);
+  };
+  
   // clickPhoto = (event) => {
   //     var f = event.target.getAttribute('data-filename');
   //     this.setState({selectedPhotos: this.state.selectedPhotos.push(f)});
@@ -78,7 +90,7 @@ export default function MonthView() {
         <Button onClick={nextMonth}>&raquo;</Button>
       </div>
       
-      <EntryTree entries={data.entries} includeDate={true} onSubmit={getData} sort="category"/>
+      <EntriesView entries={data.entries} includeDate={true} onSubmit={getData} onClick={clickEntry} selected={selectedEntries} />
       <PhotoList data={data.unlinkedPhotos} />
     </div>
   );
