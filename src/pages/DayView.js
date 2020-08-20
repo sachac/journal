@@ -3,12 +3,11 @@ import history from "../history";
 // import { HotKeys } from "react-hotkeys";
 import Button from '@material-ui/core/Button';
 import PhotoList from '../components/PhotoList';
-import EntryForm from '../pages/EntryForm';
+import EntryForm from '../components/EntryForm';
 import DateSelector from '../components/DateSelector';
 import EntriesView from '../components/EntriesView';
 import { Link, useParams } from "react-router-dom";
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-import { debounce } from 'throttle-debounce';
 
 import moment from 'moment';
 // const keyMap = {
@@ -45,7 +44,6 @@ export default function DayView() {
     // }
 
     const getData = async() => {
-        console.log('fetching', date);
         return fetch('/api/date/' + moment(date).format('YYYY-MM-DD'))
             .then(res => res.json())
             .then(data => setData(data));
@@ -109,7 +107,7 @@ export default function DayView() {
           <DateSelector value={date} onChange={onChange} />
           <PhotoList scroll onDelete={handlePhotoDelete} onClick={handlePhotoClick} data={data.unlinkedPhotos} selected={selected} />
           <OtherActions selected={selected}/>
-          <EntriesView entries={data.entries} onEntryClick={handleEntryClick} />
+          <EntriesView entries={data.entries} onClick={handleEntryClick} />
           <DateSelector value={date} onChange={onChange} />
           <OtherActions selected={selected}/>
           <EntryForm date={date} quick onSubmit={onQuickEntry} photos={selected}/>

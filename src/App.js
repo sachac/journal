@@ -9,7 +9,7 @@ import {
 import './App.css';
 import DayView from './pages/DayView';
 import MonthView from './pages/MonthView';
-import EntryForm from './pages/EntryForm';
+import EntryForm from './components/EntryForm';
 import Entries from './pages/Entries';
 import Settings from './pages/Settings';
 import Changes from './pages/Changes';
@@ -89,4 +89,12 @@ export default function App() {
                   </Router>
                 </MuiPickersUtilsProvider></div></ThemeProvider>
            );
+}
+
+export function objToQueryString(obj) {
+  const keyValuePairs = [];
+  for (let i = 0; i < Object.keys(obj).length; i += 1) {
+    keyValuePairs.push(`${encodeURIComponent(Object.keys(obj)[i])}=${encodeURIComponent(Object.values(obj)[i])}`);
+  }
+  return keyValuePairs.join('&');
 }

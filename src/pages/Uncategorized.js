@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import EntryForm from '../pages/EntryForm';
+import EntryForm from '../components/EntryForm';
 
 
 export default function Uncategorized() {

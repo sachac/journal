@@ -21,7 +21,7 @@ app.use(express.static(path.join(__dirname, '../build')));
 app.use('/thumbnails', express.static(process.env.THUMBNAILS_DIR));
 
 app.get('/thumbnails/:filename', async(req, res) => {
-    let f = await findOriginalPicture(req.params.filename);
+  let f = await findOriginalPicture(req.params.filename);
     if (f) {
         res.sendFile(f);
     } else {
@@ -428,12 +428,12 @@ async function updatePictureRecords() {
 
 async function findImageInDir(dir, filename) {
     return fs.readdir(dir).then((sketches) => {
-        let id = filename.match(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][a-z]/);
-        let m = filename.match(/^[^#]+/);
-        let f = null;
-        if (id) {
-            f = sketches.find((x) => x.startsWith(id));
-        } else if (m) {
+      let id = filename.match(/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][a-z]/);
+      let m = filename.replace(/\.(jpg|png)$/, '').match(/^[^#]+/);
+      let f = null;
+      if (id) {
+        f = sketches.find((x) => x.startsWith(id));
+      } else if (m) {
             f = sketches.find((x) => x.startsWith(m[0]));
         }
         if (f) {
@@ -446,11 +446,11 @@ async function findImageInDir(dir, filename) {
 
 async function findOriginalPicture(o) {
     return imageDirs.reduce((prevPromise, cur) => {
-        return prevPromise.then((acc) => {
-            if (acc) return acc;
-            let f = findImageInDir(cur, o);
-            return f;
-        });
+      return prevPromise.then(async (acc) => {
+        if (acc) return acc;
+        let f = await findImageInDir(cur, o);
+        return f;
+      });
     }, Promise.resolve(null));
 }
 
@@ -551,9 +551,19 @@ async function linkPictures(id, filenames) {
         return null;
     }
 }
-async function linkEntry(entry, newZID) {
+async function linkEntry(entry, newZID, note) {
+  entry.Other = entry.Other || '';
   if (!entry.Other.match('ref:' + newZID)) {
-    entry.Other = entry.Other + "\nref:" + newZID; 
+    entry.Other = entry.Other + "\nref:" + newZID + (note ? ' ' + note : ''); 
+    return entry.save();
+  } else {
+    return entry;
+  }
+}
+async function tagEntry(entry, tag, note) {
+  entry.Other = entry.Other || '';
+  if (!entry.Other.match('#' + tag)) {
+    entry.Other = entry.Other + "\n#" + tag + (note ? ' ' + note : ''); 
     return entry.save();
   } else {
     return entry;
@@ -569,8 +579,18 @@ app.post('/api/entries/zid/:zid/links/:toZID', async (req, res) => {
     res.sendStatus(404);
   }
 });
+app.post('/api/entries/zid/:zid/tags/:tag', async (req, res) => {
+  let entry = await getEntryByZID(req.params.zid);
+  if (entry) {
+    let result = await tagEntry(entry, req.params.tag, req.body.note);
+    if (result) { res.json(result); }
+    else { res.send(500); }
+  } else {
+    res.sendStatus(404);
+  }
+});
 app.post('/api/entries/zid/:zid/links', async (req, res) => {
-    let result = await linkEntry(await getEntryByZID(req.params.zid), req.body.ZIDString);
+  let result = await linkEntry(await getEntryByZID(req.params.zid), req.body.ZIDString, req.body.note);
     if (result) { res.json(result); }
     else { res.send(500); }
 });

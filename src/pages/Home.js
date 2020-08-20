@@ -217,7 +217,7 @@ class Journal extends Component {
             filtered: [],
             clicked: false,
             filterText: ''
-        }
+        };
         this.updateFilter = this.updateFilter.bind(this);
         this.showEntriesForDate = this.showEntriesForDate.bind(this);
         this.filterEntriesDebounced = debounce(500, this.filterEntries);

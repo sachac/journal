@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PhotoList from './PhotoList';
-import EntryForm from '../pages/EntryForm';
+import EntryForm from '../components/EntryForm';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import InsertLinkIcon from '@material-ui/icons/InsertLink';
