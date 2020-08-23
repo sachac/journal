@@ -1,6 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import OverflowWrapper from 'react-overflow-wrapper';
+import SimpleReactLightbox, { SRLWrapper } from "simple-react-lightbox";
 
 const useStyles = makeStyles(theme => ({
   scrollMenu: { position: 'sticky', top: 0, zIndex: 2 },
@@ -28,16 +29,22 @@ function Photo(data) {
     }
 }
 
+function onlyUnique(value, index, self) { 
+  return self.indexOf(value) === index;
+}
+
 function PhotoList(data) {
   const classes = useStyles();
-    if (!data || !data.data) return null;
-    const menu = data.data.map((p) => {
-        return <Photo key={p.filename || p} isSelected={data.selected && data.selected.includes(p)} onClick={data.onClick} photo={p}/>;
-    });
+  if (!data || !data.data) return null;
+  const menu = data.data.flat().filter(onlyUnique).map((p) => {
+    return <Photo key={p.filename || p} isSelected={data.selected && data.selected.includes(p)} onClick={data.onClick} photo={p}/>;
+  });
   if (data.scroll) {
     return <div className={classes.scrollMenu}><OverflowWrapper>{menu}</OverflowWrapper></div>;
-  } else {
+  } else if (data.onClick) {
     return <div className="photoList"><div>{menu}</div></div>;
+  } else {
+    return <SimpleReactLightbox><div className="photoList"><SRLWrapper>{menu}</SRLWrapper></div></SimpleReactLightbox>;
   }
 }
 

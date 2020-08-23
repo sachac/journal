@@ -24,6 +24,9 @@ const useStyles = makeStyles(theme => ({
     minWidth: 275,
     margin: 5,
     fontSize: 20,
+    '& img': {
+      objectFit: 'contain'
+    },
     '&.selected': {
       border: '2px solid yellow' 
     }

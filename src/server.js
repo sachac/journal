@@ -239,13 +239,23 @@ async function getEntries(params) {
     return entries.exec();  
 }
 
+async function fixEntryPictureList(entry) {
+  if (entry.Pictures) {
+    console.log('val', entry.Pictures.split(/,/));
+    entry.PictureList = entry.Pictures.split(/,/);
+    await entry.save();
+    console.log(entry.PictureList);
+  }
+}
+
+
 app.get('/api/date/:date', async (req, res) => {
-    var date = (req.params.date || '').replace(/[^0-9]/g, '');
-    var filter = getDaySpan(date);
-    var photos = await getPhotos(req.params);
-    var dayEntries = await getEntries(req.params);
-    var linkedPhotos = dayEntries.reduce((old, e) => { return old.concat(e.PictureList); }, []);
-    var unlinkedPhotos = photos.filter((d) => { return linkedPhotos.indexOf(d.filename) < 0; });
+  var date = (req.params.date || '').replace(/[^0-9]/g, '');
+  var filter = getDaySpan(date);
+  var photos = await getPhotos(req.params);
+  var dayEntries = await getEntries(req.params);
+  var linkedPhotos = dayEntries.reduce((old, e) => { return [].concat(old, (e.Pictures || '').split(/,/g)); }, []).filter((f) => f);
+  var unlinkedPhotos = photos.filter((d) => { return linkedPhotos.indexOf(d.filename) < 0; });
     res.json({
         photos: photos,
         linkedPhotos: linkedPhotos,
@@ -286,12 +296,12 @@ function getDateParams(params) {
 }
 
 app.get('/api/combined', async (req, res) => {
-    let search = {Status: {$ne: 'Deleted'}, Date: getDateParams(req.query)};
-    let start = search.Date.$gte.replace(/[^0-9]/g, '');
-    let end = search.Date.$lt.replace(/[^0-9]/g, '');
-    var photos = await getPhotos({date: getDateParams(req.dateQuery)});
-    var dayEntries = await getEntries(req.params);
-    var linkedPhotos = dayEntries.reduce((old, e) => { return old.concat(e.PictureList); }, []);
+  let search = {Status: {$ne: 'Deleted'}, Date: getDateParams(req.query)};
+  let start = search.Date.$gte.replace(/[^0-9]/g, '');
+  let end = search.Date.$lt.replace(/[^0-9]/g, '');
+  var photos = await getPhotos({date: getDateParams(req.dateQuery)});
+  var dayEntries = await getEntries(req.params);
+  var linkedPhotos = dayEntries.reduce((old, e) => { return old.concat(e.PictureList); }, []).flat();
     var unlinkedPhotos = photos.filter((d) => { return linkedPhotos.indexOf(d) < 0; });
     res.json({
         photos: photos,
@@ -736,7 +746,7 @@ const EntrySchema = new mongoose.Schema({
     Note: { type: String },
     Category: { type: String },
     Pictures: { type: String },
-    PictureList: { type: Array },
+    PictureList: { type: [String] },
     Level: { type: Number },
     Date: { type: Date },
     Time: { type: String },
