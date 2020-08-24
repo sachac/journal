@@ -1,4 +1,4 @@
-import { addDays } from 'date-fns';
+import { addDays, addYears } from 'date-fns';
 import React, { useEffect, useState } from 'react';
 import { DatePicker } from '@material-ui/pickers';
 import { Button } from '@material-ui/core';
@@ -11,17 +11,17 @@ const useStyles = makeStyles({
 });
 export default function DateSelector(data) {
     const classes = useStyles();
-    const previousDay = () => {
-        data.onChange(addDays(data.value, -1));
-    };
-    const nextDay = () => {
-        data.onChange(addDays(data.value, 1));
-    };
+    const previousDay = () => { data.onChange(addDays(data.value, -1)); };
+    const nextDay = () => { data.onChange(addDays(data.value, 1)); };
+    const previousYear = () => { data.onChange(addYears(data.value, -1)); };
+    const nextYear = () => { data.onChange(addYears(data.value, 1)); };
     return (<div className="dateSelector">
-            <Button onClick={previousDay}>&laquo;</Button>
-            <DatePicker value={data.value} format="yyyy-MM-dd" onChange={data.onChange} className={classes.date}/>
-            <Button onClick={nextDay}>&raquo;</Button>
-            <Button component={Link} to={'/day/' + moment(data.value).format('YYYY-MM-DD')}>Go</Button>
+              <Button onClick={previousYear}>&laquo;</Button>
+              <Button onClick={previousDay}>&lt;</Button>
+              <DatePicker value={data.value} format="yyyy-MM-dd" onChange={data.onChange} className={classes.date}/>
+              <Button onClick={nextDay}>&gt;</Button>
+              <Button onClick={nextYear}>&raquo;</Button>
+              <Button component={Link} to={'/day/' + moment(data.value).format('YYYY-MM-DD')}>Go</Button>
           </div>);
 }
 
