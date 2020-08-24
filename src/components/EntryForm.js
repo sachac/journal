@@ -81,6 +81,7 @@ export default function EntryForm(props) {
   const [dateData, setDateData] = useState({});
   const [photos, setPhotos] = useState(parsed.filename ? [parsed.filename] : []);
   const [ZIDString, setZIDString] = useState('');
+  const [message, setMessage] = useState('');
   const setEntry = (data) => {
     setNote(data.Note || '');
     setID(data.ID || 0);
@@ -125,6 +126,26 @@ export default function EntryForm(props) {
         });
     }
   };
+  const splitEntry = async () => {
+    let noteBodies = note.split(/\n+/);
+    let newEntry = {Category: category,
+                    Other: other,
+                    Date: moment(date).format('YYYY-MM-DD'),
+                    Time: time,
+                    PictureList: photos
+                   };
+    await noteBodies.reduce((prevPromise, cur) => {
+      return prevPromise.then((_) => {
+        return fetch('/api/entries', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json' },
+          body: JSON.stringify({...newEntry, Note: cur})
+        }).then((res) => res.json()).then((o) => {
+          setMessage(`Created ${o.ZIDString}: ${o.Note}`);
+        });
+      });
+    }, Promise.resolve([]));
+  };
   const saveEntry = () => {
     if (id) {
       fetch('/api/entries/' + id, {
@@ -135,7 +156,7 @@ export default function EntryForm(props) {
                               Other: other,
                               Date: moment(date).format('YYYY-MM-DD'),
                               Time: time,
-                              Pictures: photos ? photos.join(',') : ''
+                              PictureList: photos
                              })
       }).then((res) => res.json())
         .then((res) => {
@@ -147,7 +168,7 @@ export default function EntryForm(props) {
                       Other: other,
                       Date: moment(date).format('YYYY-MM-DD'),
                       Time: time,
-                      Pictures: photos ? photos.join(',') : ''
+                      PictureList: photos
                      };
       fetch('/api/entries', {
         method: 'POST',
@@ -195,34 +216,34 @@ export default function EntryForm(props) {
   const deselectPhoto = (e, p) => {
     setPhotos(photos.filter(d => d !== p));
   };
-  const unlinkedPhotos = dateData && dateData.unlinkedPhotos && dateData.unlinkedPhotos.filter(d => !photos.includes(d));
+  const unlinkedPhotos = dateData && dateData.unlinkedPhotos && dateData.unlinkedPhotos.filter(d => !photos.includes(d.filename));
+  const actions = (<span>
+                     <Button className="save" variant="contained" color="primary" onClick={saveEntry}>Save</Button>
+                     <Button className="split" variant="contained" color="primary" onClick={splitEntry}>Split</Button>
+                     {props.id ? <Button className="delete" variant="contained" onClick={deleteEntry}>Delete</Button> : null}
+                   </span>);
   if (props.quick) {
     return (
       <form className={classes.root} noValidate onSubmit={saveEntry}>
         <TextField label="Note" multiline name='note' value={note} onChange={handleChange} autoFocus className={classes.note} />
         <TextField label="Other" multiline name='other' value={other} onChange={handleChange} className={classes.note} />
         <CategoryList value={category} onChange={handleChange} className={classes.category} />
-        <Button className="save" variant="contained" color="primary" onClick={saveEntry}>Save</Button>
-        <Button className="delete" variant="contained" onClick={deleteEntry}>Delete</Button>
-        <Link to={"/entries/" + (id ? id : 'new')}>Full form</Link>
+        {actions}
+        <Link to={"/entries/" + (id ? id : 'new')}>Full form</Link> {message}
       </form>
     );
   } else {
     return (
       <div>
         <form className={classes.root} noValidate onSubmit={saveEntry}>
-          
-          <div><Button className="save" variant="contained" color="primary" onClick={saveEntry}>Save</Button>
-            {id ? <Button className="delete" variant="contained" onClick={deleteEntry}>Delete</Button> : null }
-            <Link to={"/zid/" + ZIDString}>{ZIDString}</Link>
-          </div>
+          {actions}
           <TextField label="Note" multiline name='note' value={note} onChange={handleChange} autoFocus className={classes.note} />
           <TextField label="Other" multiline name='other' value={other} onChange={handleChange} className={classes.note} />
           <CategoryList value={category} onChange={handleChange} className={classes.category} onKeyPress={handleKey} />
           <TextField label="Time" value={time} onChange={handleChange} name="time" />
           <PhotoList data={photos} onClick={deselectPhoto}/>         
           <PhotoList data={unlinkedPhotos} onClick={selectPhoto}/>            
-          <div><Button className="save" onClick={saveEntry}>Save</Button></div>
+          {actions}
         </form>
         <Grid container spacing={3}>
           <Grid item sm>

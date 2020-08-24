@@ -61,10 +61,7 @@ export function EntryCard(data) {
       return null;
     }
   };
-  const clickEdit = () => {
-    setEditing(true);
-  };
-
+  
   let classNames = classes.card;
   if (data.selected && data.selected.indexOf(entry.ZIDString) >= 0) {
     classNames += ' selected';
@@ -98,7 +95,7 @@ export default function EntryWall(data) {
     <div className={classes.root}>
       <Masonry breakpointCols={breakpoints} className="my-masonry-grid" columnClassName="my-masonry-grid-column">
         {data && data.entries && data.entries.map((entry) => {
-          return (<EntryCard onClick={data.onClick} selected={data.selected} includeDate={data.includeDate} key={entry.ID} entry={entry} onClick={data.onClick}/>
+          return (<EntryCard onClick={data.onClick} selected={data.selected} includeDate={data.includeDate} key={entry.ID} entry={entry} />
                  );                    
         })}
       </Masonry>

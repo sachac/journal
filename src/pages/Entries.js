@@ -5,8 +5,6 @@ import Button from '@material-ui/core/Button';
 
 import { DatePicker } from '@material-ui/pickers';
 import moment from 'moment';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
 
 export default function Entries(data) {
     const [fromDate, setFromDate] = useState(new Date(Date.now() - 1000 * 60 * 60 * 24 * 8));

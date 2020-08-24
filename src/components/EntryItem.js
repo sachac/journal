@@ -3,7 +3,6 @@ import PhotoList from './PhotoList';
 import EntryForm from '../components/EntryForm';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
-import InsertLinkIcon from '@material-ui/icons/InsertLink';
 import { Link } from 'react-router-dom';
 import EntryNote from '../components/EntryNote.js';
 
@@ -23,9 +22,11 @@ export default function EntryItem(data) {
     if (data.selected && data.selected.indexOf(entry.ZIDString) >= 0) {
       classes += ' selected';
     }
-    return <div className={classes} onClick={(e) => data.onClick && data.onClick(e, entry)}><PhotoList data={entry.PictureList} />
-                                                 <IconButton onClick={(e) => { setEditing(!isEditing); } }><EditIcon fontSize="small"/></IconButton>
-                                                 <EntryNote value={entry.Note} /> <EntryNote className="other" value={entry.Other}/> ({zidLink})
-                                               </div>;
+    let other = (data.options && data.options.other !== false) ? <EntryNote className="other" value={entry.Other}/> : null;
+    let images = (data.options && data.options.images !== false) ? <PhotoList data={entry.PictureList} /> : null;
+    return <div className={classes} onClick={(e) => data.onClick && data.onClick(e, entry)}>{images}
+             <IconButton onClick={(e) => { setEditing(!isEditing); } }><EditIcon fontSize="small"/></IconButton>
+             <EntryNote value={entry.Note} /> {other} ({zidLink})
+           </div>;
   }
 };

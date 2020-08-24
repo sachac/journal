@@ -33,7 +33,7 @@ function CategoryTree(data) {
              <div className={classes.category}>{data.category}</div>
              <ul className={classes.items}>
                {data.entries.map((entry, key) => {
-                   return <li key={key}><EntryItem entry={entry} onClick={data.onClick} onSubmit={data.onSubmit} selected={data.selected} /></li>;
+                 return <li key={key}><EntryItem entry={entry} {...data} /></li>;
                })}
              </ul>
            </li>;
@@ -46,12 +46,12 @@ export default function EntryTree(data) {
         setByCategory(Object.entries(groupBy(data.entries, e => e.Category || 'Uncategorized')));  
     }, [data, data.entries]);
     if (data.sort === 'category') {
-        return <ul className={classes.root}>{byCategory.map((e) => <CategoryTree key={e[0]} selected={data.selected} category={e[0]} entries={e[1]} onSubmit={data.onSubmit} onClick={data.onClick} />)}</ul>;        
+      return <ul className={classes.root}>{byCategory.map((e) => <CategoryTree {...data} key={e[0]} selected={data.selected} category={e[0]} entries={e[1]}  />)}</ul>;        
     } else {
         if (data.entries) {
             return <ul className={classes.root}>{
                 data.entries.map((e, k) => {
-                    return <li key={k}><EntryItem entry={e} onClick={data.onClick} onSubmit={data.onSubmit} selected={data.selected} /></li>;
+                  return <li key={k}><EntryItem entry={e} {...data} /></li>;
                 })}</ul>;
         } else {
             return null;

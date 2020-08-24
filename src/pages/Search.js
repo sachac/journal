@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import Button from '@material-ui/core/Button';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
@@ -10,7 +9,7 @@ import { objToQueryString } from '../App';
 import { debounce } from 'throttle-debounce';
 import Checkbox from '@material-ui/core/Checkbox';
 import EntriesView from '../components/EntriesView';
-import BulkOperations from '../components/BulkOperations';
+import BulkOperations, { SelectedInfo } from '../components/BulkOperations';
 
 
 // const keyMap = {
@@ -75,10 +74,11 @@ export default function Search(props) {
         <IconButton type="submit"><SearchIcon/></IconButton> {message}
       </form>
       <div style={{position: 'sticky', top: 0, background: '#303030'}}>
-    <BulkOperations selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
-    </div>
+        <BulkOperations entries={entries} selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
+      </div>
       <EntriesView entries={entries} onClick={clickEntry} selected={selectedEntries} view="list"/>
-      <BulkOperations selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
+      <BulkOperations entries={entries} selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
+      <SelectedInfo entries={entries} selected={selectedEntries} />
     </div>
   );
 }
