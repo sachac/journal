@@ -19,6 +19,7 @@ import TagView from './pages/TagView';
 import ZIDView from './pages/ZIDView';
 import OnThisDay from './pages/OnThisDay';
 import PhotoDiary from './pages/PhotoDiary';
+import ZIDList from './pages/ZIDList';
 import NavBar from './components/NavBar';
 import Uncategorized from './pages/Uncategorized';
 import Incomplete from './pages/Incomplete';
@@ -84,6 +85,7 @@ export default function App() {
                         return <Route key={key} path={r.routePath || r.path} component={r.component}></Route>;
                       }
                     })}
+                    <Route path="/zids/:zids" component={ZIDList} />
                     <Route path="/entries/:idParam" component={EntryForm} />
                   </Switch>
                 </Router>

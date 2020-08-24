@@ -34,6 +34,7 @@ export default function BulkOperations(data) {
     if (event.target.name === 'input') { setInput(event.target.value); }
   };
   let idList = data.selected.join(',');
+  let reverseIdList = data.selected.reverse().join(',');
   let refList = data.selected.map((o) => { return `ref:${o}\n`; }).join('');
   const quoteImage = function(s) {
     s = s.replace(/[\*\?"]/g, (x) => '\\' + x);
@@ -48,6 +49,7 @@ export default function BulkOperations(data) {
   }, []).join(' ');
   let selectedInfo = (data.selected.length > 0) ?
       (<div><div>IDs: {idList}</div>
+         <div>Reverse: {reverseIdList}</div>
          <div>Refs: {refList}</div>
          <div>Images: {imageList}</div></div>) : null;
   return (<div>
