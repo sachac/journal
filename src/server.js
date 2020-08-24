@@ -167,7 +167,7 @@ function getDaySpan(date) {
 async function maybeAddImages(oldList, directory, filter) {
     if (!directory) { return oldList; }
     let list = await fs.readdir(directory);
-    list = list.filter((f) => !f.match(/\.xmp$/));
+    list = list.filter((f) => f.match(/\.(jpg|png)$/));
     list = list.filter((f) => {
         let date = getDateFromFilename(f);
         if (date) {
