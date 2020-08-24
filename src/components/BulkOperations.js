@@ -33,6 +33,17 @@ export default function BulkOperations(data) {
   const handleChange = event => {
     if (event.target.name === 'input') { setInput(event.target.value); }
   };
+  return (<div>
+            <TextField label="Input" value={input} onChange={handleChange} name="input"/>
+            <Button onClick={linkSelected}>Link selected</Button>
+            <Button onClick={tagSelected}>Tag selected</Button>
+            <Button onClick={data.onClear}>Clear selection</Button>
+            <Button onClick={data.onSelectAll}>Select all</Button>
+          </div>);
+  
+}
+
+export function SelectedInfo(data) {
   let idList = data.selected.join(',');
   let reverseIdList = data.selected.reverse().join(',');
   let refList = data.selected.map((o) => { return `ref:${o}\n`; }).join('');
@@ -40,25 +51,19 @@ export default function BulkOperations(data) {
     s = s.replace(/[\*\?"]/g, (x) => '\\' + x);
     return '"' + s + '"';
   };
-  let imageList = data.entries.reduce((prev, o) => {
-    if (data.selected.includes(o.ZIDString)) {
-      return prev.concat((o.PictureList || []).map(quoteImage));
-    } else {
-      return prev;
-    }
-  }, []).join(' ');
-  let selectedInfo = (data.selected.length > 0) ?
-      (<div><div>IDs: {idList}</div>
+  let imageList = [];
+  if (data.entries) {
+    imageList = data.entries.reduce((prev, o) => {
+      if (data.selected.includes(o.ZIDString)) {
+        return prev.concat((o.PictureList || []).map(quoteImage));
+      } else {
+        return prev;
+      }
+    }, []).join(' ');
+  }
+  return (data.selected.length > 0) ?
+    (<div><div>IDs: {idList}</div>
          <div>Reverse: {reverseIdList}</div>
          <div>Refs: {refList}</div>
          <div>Images: {imageList}</div></div>) : null;
-  return (<div>
-            <TextField label="Input" value={input} onChange={handleChange} name="input"/>
-            <Button onClick={linkSelected}>Link selected</Button>
-            <Button onClick={tagSelected}>Tag selected</Button>
-            <Button onClick={data.onClear}>Clear selection</Button>
-            <Button onClick={data.onSelectAll}>Select all</Button>
-            {selectedInfo}
-          </div>);
-  
 }
