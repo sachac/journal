@@ -8,7 +8,7 @@ import { useParams } from "react-router-dom";
 import moment from 'moment';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import { BulkOperations } from './Search';
+import BulkOperations from '../components/BulkOperations';
 
 export default function TagView(data) {
   const [entries, setEntries] = useState([]);
@@ -41,9 +41,9 @@ export default function TagView(data) {
   return (
     <div>
       <h1>{tagParam}</h1>
-      <BulkOperations selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
+      <BulkOperations entries={entries} selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
       <EntriesView entries={entries} view="list" onClick={clickEntry} selected={selectedEntries}/>
-      <BulkOperations selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
+      <BulkOperations entries={entries} selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
     </div>
     
   );        

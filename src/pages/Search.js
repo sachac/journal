@@ -10,6 +10,7 @@ import { objToQueryString } from '../App';
 import { debounce } from 'throttle-debounce';
 import Checkbox from '@material-ui/core/Checkbox';
 import EntriesView from '../components/EntriesView';
+import BulkOperations from '../components/BulkOperations';
 
 
 // const keyMap = {
@@ -82,44 +83,3 @@ export default function Search(props) {
   );
 }
 
-export function BulkOperations(data) {
-  let selectedEntries = data.selected;
-  const tagSelected = () => {
-    let list = selectedEntries.sort().reverse();
-    let promises = list.map((o) => {
-      return fetch('/api/entries/zid/' + o + '/tags/' + input.replace(/^#/, ''), {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'}});
-    });
-    Promise.all(promises).then(function() {
-      if (data.onDone) { data.onDone('tagged');}
-    });
-  };
-  const linkSelected = () => {
-    let list = selectedEntries.sort().reverse();
-    let i;
-    let promises = [];
-    for (i = 0; i < list.length - 1; i++) {
-      promises.push(fetch('/api/entries/zid/' + list[i] + '/links/' + list[i + 1], {
-        method: 'POST',
-        body: JSON.stringify({note: input}),
-        headers: {'Content-Type': 'application/json'}}));
-    };
-    Promise.all(promises).then(function() {
-      if (data.onDone) { data.onDone('linked'); }
-    });
-  };
-  const [ input, setInput ] = useState('');
-  const handleChange = event => {
-    if (event.target.name === 'input') { setInput(event.target.value); }
-  };
-   
-  return (<div>
-            <TextField label="Input" value={input} onChange={handleChange} name="input"/>
-            <Button onClick={linkSelected}>Link selected</Button>
-            <Button onClick={tagSelected}>Tag selected</Button>
-            <Button onClick={data.onClear}>Clear selection</Button>
-            <Button onClick={data.onSelectAll}>Select all</Button>
-          </div>);
-  
-}
