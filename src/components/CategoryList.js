@@ -5,6 +5,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 const categories = ['',
                     'Gross motor',
                     'Eating',
+                    'Meta',
                     'Fine motor', 'Language', 'Kaizen', 'Us', 'Self-care and independence', 'Social', 'Other', 'Household', 'Field trip', 'Pretend', 'Music', 'Oops', 'Sensory', 'Cognition', 'Emotion', 'Consulting', 'Track', 'Art', 'World', 'Thoughts', 'Interests', 'Sleep'].sort();
 
 export default function CategoryList(data) {
