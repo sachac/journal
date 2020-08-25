@@ -60,7 +60,7 @@ async function saveEntries(entries) {
 }
 
 function isPublic(d) {
-  return !d.Note.match(/^!/)
+  return !(d.Note && d.Note.match(/^!/))
     && d.Category != 'Consulting'
     && d.Category != 'KGA'
     && d.Category != 'Track';
@@ -653,7 +653,7 @@ app.delete('/api/entries/:id/pictures', async (req, res) => {
 async function createEntry(e) {
   if (e.Date) {
     if (e.Time) {
-      e.Date = moment(e.Date + ' ' + e.Time).toDate();
+      e.Date = moment(moment(e.Date).format('YYYY-MM-DD') + ' ' + e.Time).toDate();
     }
   } else {
     e.Date = new Date();
