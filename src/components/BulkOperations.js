@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import { Link } from 'react-router-dom';
 
 export default function BulkOperations(data) {
   let selectedEntries = data.selected;
@@ -62,7 +63,7 @@ export function SelectedInfo(data) {
     }, []).join(' ');
   }
   return (data.selected.length > 0) ?
-    (<div><div>IDs: {idList}</div>
+    (<div><div>IDs: {idList} <Link to={'/zids/' + idList }>Open</Link></div> 
          <div>Reverse: {reverseIdList}</div>
          <div>Refs: {refList}</div>
          <div>Images: {imageList}</div></div>) : null;
