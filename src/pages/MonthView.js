@@ -34,7 +34,7 @@ export default function MonthView() {
 
   const clickEntry = (event, entry) => {
     let index = selectedEntries.indexOf(entry.ZIDString);
-    if (index == -1) {
+    if (index === -1) {
       selectedEntries.push(entry.ZIDString);
     } else {
       selectedEntries.splice(index, 1);

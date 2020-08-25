@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import PhotoList from './PhotoList';
-import EntryForm from '../components/EntryForm';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import { Link } from 'react-router-dom';

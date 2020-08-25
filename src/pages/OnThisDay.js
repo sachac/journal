@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
-import EntriesView from '../components/EntriesView';
 import { DayEntriesView } from '../pages/DayView';
 import DateSelector from '../components/DateSelector';
 import moment from 'moment';

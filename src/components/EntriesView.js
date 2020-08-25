@@ -36,9 +36,9 @@ export default function EntriesView(data) {
     setView(newValue);
   };
   const handleChange = (event, newValue) => {
-    if (event.target.name == 'other') { setOptions({...options, other: event.target.checked}); }
-    if (event.target.name == 'images') { setOptions({...options, images: event.target.checked}); }
-    if (event.target.name == 'private') { setOptions({...options, private: event.target.checked}); }
+    if (event.target.name === 'other') { setOptions({...options, other: event.target.checked}); }
+    if (event.target.name === 'images') { setOptions({...options, images: event.target.checked}); }
+    if (event.target.name === 'private') { setOptions({...options, private: event.target.checked}); }
   };
   if (view === 'cards') {
     entries = <EntryWall {...data} entries={entryList} options={options} includeDate={true} />;

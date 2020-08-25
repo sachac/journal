@@ -18,12 +18,6 @@ export default function Entries(data) {
             .then(setEntries);
         return null;
     };
-    const [ view, setView ] = useState('tree');
-    const handleChange = (e, newValue) => {
-        console.log('event', e, newValue);
-        setView(newValue);
-    };
-    
     return (
         <div>
           From: <DatePicker value={fromDate} format="yyyy-MM-dd" onChange={setFromDate} />

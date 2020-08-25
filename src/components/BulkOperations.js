@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
@@ -49,7 +49,7 @@ export function SelectedInfo(data) {
   let reverseIdList = data.selected.reverse().join(',');
   let refList = data.selected.map((o) => { return `ref:${o}\n`; }).join('');
   const quoteImage = function(s) {
-    s = s.replace(/[\*\?"]/g, (x) => '\\' + x);
+    s = s.replace(/[*?"]/g, (x) => '\\' + x);
     return '"' + s + '"';
   };
   let imageList = [];

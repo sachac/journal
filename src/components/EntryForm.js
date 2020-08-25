@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
 import DateSelector from '../components/DateSelector';
 import EntryTree from '../components/EntryTree';
 import PhotoList from '../components/PhotoList';
@@ -62,7 +61,7 @@ function useEntryBehavior(props) {
       }).then((res) => {
         if (props.onSubmit) { props.onSubmit(res); }
         // After creating a new entry, clear the items and update the list of entries for the day
-        setEntry({Time: moment().format('HH:mm:ss'), Date: moment(res.Date).format('YYYY-MM-DD')});
+        setEntry({Note: '', Other: '', Category: '', Time: moment().format('HH:mm:ss'), Date: moment(res.Date).format('YYYY-MM-DD')});
       });
     }
   };
@@ -83,19 +82,24 @@ function useEntryBehavior(props) {
                 Time: event.target.value});
     }
   };
-  return { handleChange, saveEntry, deleteEntry, splitEntry };
+  const handleKey = event => {
+    if (event.key === 'Enter' && event.ctrlKey) {
+      saveEntry();
+    }
+  };
+  return { handleKey, handleChange, saveEntry, deleteEntry, splitEntry };
 }
 
 export function QuickEntryForm(props) {
   const classes = useStyles();
   const [ entry, setEntry ] = useState({id: props.id, Category: ''});
   const [ message, setMessage ] = useState('');
-  const { saveEntry, splitEntry, deleteEntry, handleChange } = useEntryBehavior({entry, setEntry, setMessage, onSubmit: props.onSubmit});
+  const { handleKey, saveEntry, splitEntry, deleteEntry, handleChange } = useEntryBehavior({entry, setEntry, setMessage, onSubmit: props.onSubmit});
   useEffect(() => { if (props.entry) setEntry(props.entry); }, [props.entry]);
   return <form className={classes.root} noValidate onSubmit={saveEntry}>
     <TextField label="Note" multiline name='note' value={entry.Note} onChange={handleChange} autoFocus className={classes.note} />
     <TextField label="Other" multiline name='other' value={entry.Other} onChange={handleChange} className={classes.note} />
-    <CategoryList value={entry.Category} onChange={handleChange} className={classes.category} />
+           <CategoryList value={entry.Category} onChange={handleChange} onKeyPress={handleKey} />
            <FormActions saveEntry={saveEntry} splitEntry={splitEntry} deleteEntry={deleteEntry} id={entry && entry.ID} />
     <Link to={"/entries/" + (props.entry && props.entry.ID ? props.entry.ID : 'new')}>Full form</Link> {message}
   </form>;
@@ -111,22 +115,10 @@ function FormActions(props) {
                    </span>);
 }
 
-function QuickSearchForRef(props) {
+export function QuickSearchForRef(props) {
   const [ query, setQuery ] = useState(props.note);
   const [ entries, setEntries ] = useState([]);
   const [ selected, setSelected ] = useState([]);
-  useEffect((o) => { getDataDebounced(); }, [query]);
-  useEffect((o) => {
-    if (props.other) {
-      let m = props.other.match(/ref:[0-9]{4}-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/g);
-      if (m) {
-        setSelected(m.map((o) => o.replace(/ref:/, '')));
-      }
-    }
-  }, [props.other]);
-  const handleChange = (event) => {
-    setQuery(event.target.value); 
-  };
   const getData = (event) => {
     if (event) { event.preventDefault(); }
     if (!query) return null;
@@ -142,7 +134,19 @@ function QuickSearchForRef(props) {
     return false;
   };
   const getDataDebounced = debounce(5000, getData);
-  
+  useEffect((o) => { getDataDebounced(); }, [query]);
+  useEffect((o) => {
+    if (props.other) {
+      let m = props.other.match(/ref:[0-9]{4}-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/g);
+      if (m) {
+        setSelected(m.map((o) => o.replace(/ref:/, '')));
+      }
+    }
+  }, [props.other]);
+  const handleChange = (event) => {
+    setQuery(event.target.value); 
+  };
+    
   return (<div>
             <TextField label="search" name="search" value={query} onChange={handleChange} />
             <IconButton onClick={getData}><SearchIcon/></IconButton>
@@ -152,31 +156,20 @@ function QuickSearchForRef(props) {
 
 export default function EntryForm(props) {
   const { idParam } = useParams();
-  const [id, setID] = useState(0);
-  const [note, setNote] = useState('');
-  const [category, setCategory] = useState('');
-  const [other, setOther] = useState('');
   const queryString = require('query-string');
   const parsed = queryString.parse(props.location && props.location.search);
   const [dateData, setDateData] = useState({});
-  const [entry, setEntry] = useState({PictureList: parsed.filename ? [parsed.filename] : []});
-  const [ZIDString, setZIDString] = useState('');
+  const [entry, setEntry] = useState({Note: '',
+                                      Other: '',
+                                      PictureList: props.photos || (parsed.filename ? [parsed.filename] : []),
+                                      Date: props.date,
+                                      Time: moment(props.Date).format('HH:mm:ss'),
+                                      Category: ''});
   const [message, setMessage] = useState('');
-  const { saveEntry, splitEntry, deleteEntry, handleChange } = useEntryBehavior({entry, setEntry, setMessage});
-  // const setEntry = (data) => {
-    
-  //   setNote(data.Note || '');
-  //   setID(data.ID || 0);
-  //   setZIDString(data.ZIDString);
-  //   setCategory(data.Category || '');
-  //   setOther(data.Other || '');
-  //   setDate(moment(data.Date).toDate());
-  //   setTime(data.Time || moment(data.Date).format('HH:mm:ss'));
-  //   setPhotos(data.PictureList || []);
-  // };
-
-  useEffect(() => { if (props.date) setEntry({...entry, Date: props.date}); }, [props.date]);
-  useEffect(() => { if (props.photos) setEntry({...entry, PictureList: props.photos}); }, [props.photos]);
+  
+  const { saveEntry, splitEntry, deleteEntry, handleChange, handleKey } = useEntryBehavior({entry, setEntry, setMessage});
+  //useEffect(() => { if (props.date && (entry.Date != props.date)) setEntry({...entry, Date: props.date}); }, [props.date]);
+  //useEffect(() => { if (props.photos) setEntry({...entry, PictureList: props.photos}); }, [props.photos]);
   useEffect(() => {
     if (idParam) fetchEntry(idParam);
     else if (props.id) fetchEntry(props.id);
@@ -203,14 +196,9 @@ export default function EntryForm(props) {
       .then((res) => res.json())
       .then((data) => setDateData(data));
   };
-  const handleKey = event => {
-    if (event.key === 'Enter' && event.ctrlKey) {
-      saveEntry();
-    }
-  };
-  const onClickRef = (event, entry) => {
-    if (!entry.Other.match('ref:' + entry.ZIDString)) {
-      setEntry({...entry, Other: entry.other + "\nref:" + entry.ZIDString});
+  const onClickRef = (event, ref) => {
+    if (!entry.Other.match('ref:' + ref.ZIDString)) {
+      setEntry({...entry, Other: (entry.Other || '') + "\nref:" + ref.ZIDString});
     }
   };
 
@@ -236,17 +224,18 @@ export default function EntryForm(props) {
   } else {
     return (
       <div>
+        {message}
         <form className={classes.root} noValidate onSubmit={saveEntry}>
           {actions}
           <TextField label="Note" multiline name='note' value={entry.Note} onChange={handleChange} autoFocus className={classes.note} />
           <TextField label="Other" multiline name='other' value={entry.Other} onChange={handleChange} className={classes.note} />
-          <CategoryList value={entry.Category} onChange={handleChange} className={classes.category} onKeyPress={handleKey} />
+          <CategoryList value={entry.Category} onChange={handleChange} onKeyPress={handleKey} />
           <TextField label="Time" value={entry.Time} onChange={handleChange} name="time" />
           <PhotoList data={entry.PictureList} onClick={deselectPhoto}/>         
           <PhotoList data={unlinkedPhotos} onClick={selectPhoto}/>            
           {actions}
         </form>
-        <QuickSearchForRef onClick={onClickRef} zid={ZIDString} other={other}/>
+        <QuickSearchForRef onClick={onClickRef} />
         <DateSelector value={entry.Date} onChange={setDate} />
         <EntryTree entries={dateData && dateData.entries}/>
       </div>

@@ -42,7 +42,7 @@ export default function Search(props) {
   const selectAll = () => { setSelectedEntries(entries.map((o) => o.ZIDString)); };
   const clickEntry = (event, entry) => {
     let index = selectedEntries.indexOf(entry.ZIDString);
-    if (index == -1) {
+    if (index === -1) {
       selectedEntries.push(entry.ZIDString);
     } else {
       selectedEntries.splice(index, 1);
