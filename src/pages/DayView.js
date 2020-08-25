@@ -3,17 +3,17 @@ import history from "../history";
 // import { HotKeys } from "react-hotkeys";
 import Button from '@material-ui/core/Button';
 import PhotoList from '../components/PhotoList';
-import EntryForm from '../components/EntryForm';
+import { QuickEntryForm } from '../components/EntryForm';
 import DateSelector from '../components/DateSelector';
 import EntriesView from '../components/EntriesView';
 import { Link, useParams } from "react-router-dom";
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-
 import moment from 'moment';
 // const keyMap = {
 //     PREVIOUS: "left",
 //     NEXT: "right"
 // };
+
 
 export function DayEntriesView(props) {
   let date = props.date;
@@ -75,7 +75,7 @@ export function DayEntriesView(props) {
       <PhotoList scroll onDelete={handlePhotoDelete} onClick={handlePhotoClick} data={props.data.unlinkedPhotos} selected={selected} />
       <OtherActions selected={selected}/>
       <EntriesView entries={props.data.entries} onClick={handleEntryClick} />
-      <EntryForm date={date} quick onSubmit={onQuickEntry} photos={selected}/>
+      <QuickEntryForm onSubmit={onQuickEntry} photos={selected} />
       {zoomPhotos}
     </div>
   );
