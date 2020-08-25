@@ -18,7 +18,6 @@ import { objToQueryString } from '../App';
 
 const useStyles = makeStyles(theme => ({
   note: { width: '100%' },
-  category: { width: '100%' },
   [theme.breakpoints.down('sm')]: {
     root: {
       fontSize: 'large',
