@@ -3,6 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Grid from '@material-ui/core/Grid';
 import { useParams } from "react-router-dom";
 import { EntryCard } from '../components/EntryWall';
+import { QuickSearchForRef } from '../components/EntryForm';
 
 export default function ZIDView(data) {
     const { zidParam } = useParams();
@@ -29,6 +30,7 @@ export default function ZIDView(data) {
         <Grid item sm>
           <h2>Entries linked from this</h2>
           {forwardLinks.map((entry) => { return <EntryCard includeDate={true} key={entry.ID} entry={entry}/>; })}
+          <QuickSearchForRef />
         </Grid>
         <Grid item sm>
         <EntryCard includeDate={true} entry={entry}/>
