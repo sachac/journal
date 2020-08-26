@@ -101,7 +101,8 @@ export function QuickEntryForm(props) {
     <TextField label="Other" multiline name='other' value={entry.Other} onChange={handleChange} className={classes.note} />
            <CategoryList value={entry.Category} onChange={handleChange} onKeyPress={handleKey} />
            <FormActions saveEntry={saveEntry} splitEntry={splitEntry} deleteEntry={deleteEntry} id={entry && entry.ID} />
-    <Link to={"/entries/" + (props.entry && props.entry.ID ? props.entry.ID : 'new')}>Full form</Link> {message}
+           <Link to={"/entries/" + (props.entry && props.entry.ID ? props.entry.ID : 'new')}>Full form</Link> {message}
+           <QuickSearchForRef zid={entry.ZIDString}/>
   </form>;
 }
 
@@ -203,8 +204,7 @@ export default function EntryForm(props) {
   };
 
   const setDate = (date) => {
-    setEntry({...entry, Date: moment(date).format('YYYY-MM-DD')});
-    
+    setEntry({...entry, Date: date});
   };
   
   useEffect(fetchDataForTheDay, [entry.Date]);
@@ -227,16 +227,16 @@ export default function EntryForm(props) {
         {message}
         <form className={classes.root} noValidate onSubmit={saveEntry}>
           {actions}
-          <TextField label="Note" multiline name='note' value={entry.Note} onChange={handleChange} autoFocus className={classes.note} />
-          <TextField label="Other" multiline name='other' value={entry.Other} onChange={handleChange} className={classes.note} />
-          <CategoryList value={entry.Category} onChange={handleChange} onKeyPress={handleKey} />
-          <TextField label="Time" value={entry.Time} onChange={handleChange} name="time" />
-          <PhotoList data={entry.PictureList} onClick={deselectPhoto}/>         
-          <PhotoList data={unlinkedPhotos} onClick={selectPhoto}/>            
+          <TextField label="Note" multiline name='note' value={entry.Note || ''} onChange={handleChange} autoFocus className={classes.note} />
+          <TextField label="Other" multiline name='other' value={entry.Other || ''} onChange={handleChange} className={classes.note} />
+          <CategoryList value={entry.Category || ''} onChange={handleChange} onKeyPress={handleKey} />
+          <TextField label="Time" value={entry.Time || ''} onChange={handleChange} name="time" />
+          <PhotoList data={entry.PictureList || []} onClick={deselectPhoto}/>         
+          <PhotoList data={unlinkedPhotos || []} onClick={selectPhoto}/>            
           {actions}
         </form>
         <QuickSearchForRef onClick={onClickRef} />
-        <DateSelector value={entry.Date} onChange={setDate} />
+        <DateSelector value={moment(entry.Date).toDate()} onChange={setDate} />
         <EntryTree entries={dateData && dateData.entries}/>
       </div>
     );
