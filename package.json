@@ -52,7 +52,7 @@
     "concurrently": "^5.1.0"
   },
   "scripts": {
-    "server": "nodemon -w src/server.js src/server.js",
+    "server": "nodemon -w src/server.js -w src/data.js src/server.js",
     "dev": "concurrently \"yarn run server\" \"yarn run start\"",
     "start": "react-scripts start",
     "build": "react-scripts build",

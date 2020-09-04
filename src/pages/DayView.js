@@ -17,13 +17,11 @@ import moment from 'moment';
 
 export function DayEntriesView(props) {
   let date = props.date;
-  const [ selected, setSelected ] = useState([]);
   const [ lastEntry, setLastEntry ] = useState();
-  
+  const [ selected, setSelected ] = useState([]);
   const handlePhotoClick = (e, p) => {
     setSelected((selected.includes(p)) ? selected.filter(d => d !== p) : selected.concat(p));
   };
-  
   const handleEntryClick = (event, entry) => {
     if (selected.length > 0) {
       fetch('/api/entries/' + entry.ID + '/pictures', {
@@ -50,7 +48,10 @@ export function DayEntriesView(props) {
       props.getData && props.getData();
     });
   };
-  const onQuickEntry = () => { setSelected([]); props.getData && props.getData(); };
+  const onQuickEntry = () => {
+    setSelected([]);
+    props.getData && props.getData();
+  };
   const OtherActions = (data) => {
     if (selected.length === 0) return null;
     return <ButtonGroup>
@@ -75,7 +76,7 @@ export function DayEntriesView(props) {
       <PhotoList scroll onDelete={handlePhotoDelete} onClick={handlePhotoClick} data={props.data.unlinkedPhotos} selected={selected} />
       <OtherActions selected={selected}/>
       <EntriesView entries={props.data.entries} onClick={handleEntryClick} />
-      <QuickEntryForm onSubmit={onQuickEntry} photos={selected} />
+      <QuickEntryForm selected={selected} date={date} onSubmit={onQuickEntry} photos={selected} />
       {zoomPhotos}
     </div>
   );

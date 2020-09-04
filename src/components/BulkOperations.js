@@ -5,32 +5,21 @@ import { Link } from 'react-router-dom';
 
 export default function BulkOperations(data) {
   let selectedEntries = data.selected;
+  const [ input, setInput ] = useState('');
   const tagSelected = () => {
-    let list = selectedEntries.sort().reverse();
-    let promises = list.map((o) => {
-      return fetch('/api/entries/zid/' + o + '/tags/' + input.replace(/^#/, ''), {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'}});
-    });
-    Promise.all(promises).then(function() {
-      if (data.onDone) { data.onDone('tagged');}
-    });
+    fetch('/api/entries/tag/bulk', {
+      method: 'POST',
+      body: JSON.stringify({tags: input.split(/ /), zids: data.selected}),
+      headers: {'Content-Type': 'application/json'}}).then(res => res.json())
+      .then((res) => { if (data.onDone) { data.onDone('tagged', res); }});
   };
   const linkSelected = () => {
-    let list = selectedEntries.sort().reverse();
-    let i;
-    let promises = [];
-    for (i = 0; i < list.length - 1; i++) {
-      promises.push(fetch('/api/entries/zid/' + list[i] + '/links/' + list[i + 1], {
-        method: 'POST',
-        body: JSON.stringify({note: input}),
-        headers: {'Content-Type': 'application/json'}}));
-    };
-    Promise.all(promises).then(function() {
-      if (data.onDone) { data.onDone('linked'); }
-    });
+    fetch('/api/entries/link/bulk', {
+      method: 'POST',
+      body: JSON.stringify({note: input, zids: data.selected}),
+      headers: {'Content-Type': 'application/json'}}).then(res => res.json())
+      .then((res) => { if (data.onDone) { data.onDone('tagged', res); }});
   };
-  const [ input, setInput ] = useState('');
   const handleChange = event => {
     if (event.target.name === 'input') { setInput(event.target.value); }
   };
@@ -40,8 +29,8 @@ export default function BulkOperations(data) {
             <Button onClick={tagSelected}>Tag selected</Button>
             <Button onClick={data.onClear}>Clear selection</Button>
             <Button onClick={data.onSelectAll}>Select all</Button>
+            {selectedEntries.length}
           </div>);
-  
 }
 
 export function SelectedInfo(data) {

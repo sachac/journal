@@ -10,6 +10,7 @@ import { debounce } from 'throttle-debounce';
 import Checkbox from '@material-ui/core/Checkbox';
 import EntriesView from '../components/EntriesView';
 import BulkOperations, { SelectedInfo } from '../components/BulkOperations';
+import useSelectEntries from '../hooks/useSelectEntries';
 
 
 // const keyMap = {
@@ -35,21 +36,9 @@ export default function Search(props) {
     if (event.target.name === 'isRegexp') { setIsRegexp(event.target.checked); }
     if (event.target.name === 'withPhotos') { setWithPhotos(event.target.checked); }
   };
-  useEffect((o) => { setSelectedEntries([]); getDataDebounced(); }, [query]);
-  const [ selectedEntries, setSelectedEntries ] = useState([]);
+  const { selectedEntries, clickEntry, clearSelection, selectAll } = useSelectEntries({entries});
+  useEffect((o) => { clearSelection(); getDataDebounced(); }, [query]);
   const bulkDone = () => { getDataDebounced(); };
-  const clearSelection = () => { setSelectedEntries([]); };
-  const selectAll = () => { setSelectedEntries(entries.map((o) => o.ZIDString)); };
-  const clickEntry = (event, entry) => {
-    let index = selectedEntries.indexOf(entry.ZIDString);
-    if (index === -1) {
-      selectedEntries.push(entry.ZIDString);
-    } else {
-      selectedEntries.splice(index, 1);
-    }
-    setSelectedEntries([...selectedEntries]);
-  };
-  
   const getData = (event) => {
     if (event) { event.preventDefault(); }
     if (!query) return null;

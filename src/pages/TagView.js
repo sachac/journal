@@ -3,6 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import EntriesView from '../components/EntriesView';
 import { useParams } from "react-router-dom";
 import BulkOperations, { SelectedInfo } from '../components/BulkOperations';
+import useSelectEntries from '../hooks/useSelectEntries';
 
 export default function TagView(data) {
   const [entries, setEntries] = useState([]);
@@ -13,20 +14,9 @@ export default function TagView(data) {
       .then(setEntries);
     return null;
   };
+  const { selectedEntries, clickEntry, clearSelection, selectAll } = useSelectEntries({entries});
   useEffect(() => { fetchData(); }, [tagParam]);
-  const [ selectedEntries, setSelectedEntries ] = useState([]);
   const bulkDone = () => { fetchData(); };
-  const clearSelection = () => { setSelectedEntries([]); };
-  const selectAll = () => { setSelectedEntries(entries.map((o) => o.ZIDString)); };
-  const clickEntry = (event, entry) => {
-    let index = selectedEntries.indexOf(entry.ZIDString);
-    if (index === -1) {
-      selectedEntries.push(entry.ZIDString);
-    } else {
-      selectedEntries.splice(index, 1);
-    }
-    setSelectedEntries([...selectedEntries]);
-  };
   
   return (
     <div>

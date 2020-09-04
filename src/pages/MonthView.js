@@ -5,9 +5,11 @@ import Button from '@material-ui/core/Button';
 import PhotoList from '../components/PhotoList';
 import history from "../history";
 import { DatePicker } from '@material-ui/pickers';
+import BulkOperations, { SelectedInfo } from '../components/BulkOperations';
 import EntriesView from '../components/EntriesView';
 import { Link, useParams } from "react-router-dom";
 import moment from 'moment';
+import useSelectEntries from '../hooks/useSelectEntries';
 
 // const keyMap = {
 //     PREVIOUS: "left",
@@ -16,31 +18,14 @@ import moment from 'moment';
 
 export default function MonthView() {
   const { dateParam } = useParams();
-  const [ data, setData ] = useState({});
+  const [ entries, setEntries ] = useState([]);
   const [ date, setDate ] = useState(dateParam ? new Date(dateParam + '-15') : new Date());
-  const [ selectedEntries, setSelectedEntries ] = useState([]);  
-  const previousMonth = () => {
-    setDate(addMonths(date, -1));
-  };
-  const nextMonth = () => {
-    setData(addMonths(date, 1));
-  };
-  const onChange = date => {
-    setDate(date);
-  };
-  useEffect(() => {
-    history.push('/month/' + moment(date).format('YYYY-MM'));
-  }, [date]);
-
-  const clickEntry = (event, entry) => {
-    let index = selectedEntries.indexOf(entry.ZIDString);
-    if (index === -1) {
-      selectedEntries.push(entry.ZIDString);
-    } else {
-      selectedEntries.splice(index, 1);
-    }
-    setSelectedEntries([...selectedEntries]);
-  };
+  const { selectedEntries, clickEntry, clearSelection, selectAll } = useSelectEntries({entries});
+  const [ unlinkedPhotos, setUnlinkedPhotos ] = useState([]);
+  const previousMonth = () => { setDate(addMonths(date, -1)); };
+  const nextMonth = () => { setDate(addMonths(date, 1)); };
+  const onChange = date => { setDate(date); };
+  useEffect(() => { history.push('/month/' + moment(date).format('YYYY-MM')); }, [date]);
   
   // clickPhoto = (event) => {
   //     var f = event.target.getAttribute('data-filename');
@@ -73,12 +58,10 @@ export default function MonthView() {
   const getData = async() => {
     fetch('/api/date/' + moment(date).format('YYYY-MM'))
       .then(res => res.json())
-      .then(data => {
-        data.entries = data.entries.sort((a, b) => a.Category < b.Category ? -1 : 1);
-        setData(data);              
-      });
+      .then(data => { setEntries(data.entries); setUnlinkedPhotos(data.unlinkedPhotos); });
     return null;
   };
+  const bulkDone = () => { getData(); };
   useEffect(() => { getData(); }, [date]);
   return (
     <div>
@@ -89,9 +72,14 @@ export default function MonthView() {
         <DatePicker value={date} onChange={onChange} format="yyyy-MM"/>
         <Button onClick={nextMonth}>&raquo;</Button>
       </div>
-      
-      <EntriesView entries={data.entries} includeDate={true} onSubmit={getData} onClick={clickEntry} selected={selectedEntries} />
-      <PhotoList data={data.unlinkedPhotos} />
+      <div style={{position: 'relative'}}>
+        <div style={{position: 'sticky', top: 0, background: '#303030'}}>
+          <BulkOperations entries={entries} selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}  />
+        </div>
+        <EntriesView entries={entries} includeDate={true} onClick={clickEntry} selected={selectedEntries} />
+      </div>
+      <PhotoList data={unlinkedPhotos} />
+      <SelectedInfo entries={entries} selected={selectedEntries} />
     </div>
   );
 }

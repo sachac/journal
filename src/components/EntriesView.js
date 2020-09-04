@@ -13,7 +13,7 @@ export function GalleryView(props) {
   if (props.entries) {
     photos = props.entries.reduce((prev, cur) => {
       if (cur.PictureList) {
-        prev = prev.concat(cur.PictureList.map((o) => { return {
+        prev = prev.concat([...new Set(cur.PictureList)].map((o) => { return {
           src: '/thumbnails/' + o,
           width: 1,
           alt: cur.ZIDString + ': ' + cur.Note + ' (' + o + ')'}; }));
