@@ -37,8 +37,7 @@ export default function Search(props) {
     if (event.target.name === 'withPhotos') { setWithPhotos(event.target.checked); }
   };
   const { selectedEntries, clickEntry, clearSelection, selectAll } = useSelectEntries({entries});
-  useEffect((o) => { clearSelection(); getDataDebounced(); }, [query]);
-  const bulkDone = () => { getDataDebounced(); };
+  const bulkDone = () => { getData(); };
   const getData = (event) => {
     if (event) { event.preventDefault(); }
     if (!query) return null;
@@ -48,11 +47,10 @@ export default function Search(props) {
       .then(data => { setEntries(data); setMessage(''); } );
     return false;
   };
-  const getDataDebounced = debounce(1500, false, getData);
   return (
     <div>
       <form onSubmit={getData}>
-        <TextField label="Search" value={query} onChange={handleChange} name="query" autoFocus />
+        <TextField label="Search" value={query} onChange={handleChange} name="query" onBlur={getData} autoFocus />
         <TextField label="Limit" value={limit} onChange={handleChange} name="limit" />
         <RadioGroup aria-label="sort" name="sort" value={sort} onChange={handleChange}>
           <FormControlLabel value="date" control={<Radio />} label="By date" />

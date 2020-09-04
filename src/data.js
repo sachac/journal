@@ -36,7 +36,9 @@ const Picture = mongoose.model('picture', PictureSchema);
 const Entry = mongoose.model('entry', EntrySchema);
 const CounterSchema = new mongoose.Schema({value: Number, name: String});
 const Counter = mongoose.model('counter', CounterSchema);
-
+module.exports.Entry = Entry;
+module.exports.Picture = Picture;
+module.exports.Counter = Counter;
 
 async function saveEntries(entries) {
   var changed = entries.filter((d) => { return d.Status; });

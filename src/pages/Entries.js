@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import "react-datepicker/dist/react-datepicker.css";
 import EntriesView from '../components/EntriesView';
 import Button from '@material-ui/core/Button';
 import useSelectEntries from '../hooks/useSelectEntries';

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import "react-datepicker/dist/react-datepicker.css";
 import EntriesView from '../components/EntriesView';
 import { useParams } from "react-router-dom";
 import BulkOperations, { SelectedInfo } from '../components/BulkOperations';

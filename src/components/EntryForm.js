@@ -98,6 +98,11 @@ export function QuickEntryForm(props) {
     setEntry({Category: '', Note: '', Other: '', Date: moment(props.date).toDate(), PictureList: props.selected});
     if (props.onSubmit) { props.onSubmit(res); }
   };
+  const linkEntryWhileEditing = function(ref, linkTo) {
+    if (linkTo && entry && !((entry.Other || '').match('ref:' + linkTo.ZIDString))) {
+      setEntry({...entry, Other: entry.Other + "\nref:" + linkTo.ZIDString});
+    }
+  };
   const { handleKey, saveEntry, splitEntry, deleteEntry, handleChange } = useEntryBehavior({entry, setEntry, setMessage, onSubmit: props.onSubmit});
   useEffect(() => { if (props.entry) setEntry(props.entry); }, [props.entry]);
   useEffect(() => { entry.Date = moment(props.date).toDate(); }, [props.date]);
@@ -108,7 +113,7 @@ export function QuickEntryForm(props) {
            <CategoryList value={entry.Category} onChange={handleChange} onKeyPress={handleKey} />
            <FormActions saveEntry={saveEntry} splitEntry={splitEntry} deleteEntry={deleteEntry} id={entry && entry.ID} />
            <Link to={"/entries/" + (props.entry && props.entry.ID ? props.entry.ID : 'new')}>Full form</Link> {message}
-           <QuickSearchForRef zid={entry.ZIDString}/>
+           <QuickSearchForRef zid={entry.ZIDString} onClick={linkEntryWhileEditing} />
   </form>;
 }
 
@@ -140,8 +145,6 @@ export function QuickSearchForRef(props) {
         })); } );
     return false;
   };
-  const getDataDebounced = debounce(5000, getData);
-  useEffect((o) => { getDataDebounced(); }, [query]);
   useEffect((o) => {
     if (props.other) {
       let m = props.other.match(/ref:[0-9]{4}-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/g);
@@ -155,7 +158,7 @@ export function QuickSearchForRef(props) {
   };
     
   return (<div>
-            <TextField label="search" name="search" value={query} onChange={handleChange} />
+            <TextField label="search" name="search" value={query} onBlur={getData} onChange={handleChange} />
             <IconButton onClick={getData}><SearchIcon/></IconButton>
             <EntryList entries={entries} onClick={props.onClick} selected={selected}/>
           </div>);
