@@ -536,9 +536,9 @@ async function linkEntry(entry, toEntry, note) {
   if (toEntry instanceof Entry) {
     toEntry = toEntry.ZIDString;
   }
-  entry.Other = entry.Other || '';
-  if (!entry.Other.match('ref:' + toEntry)) {
-    entry.Other = entry.Other + "\nref:" + toEntry + (note ? ' ' + note : ''); 
+  if (!(entry.Other || '').match('ref:' + toEntry)) {
+    entry.Other = (entry.Other ? entry.Other + "\n" : '') + "ref:" + toEntry + (note ? ' ' + note : '');
+    console.log(entry.Other);
     return entry.save();
   } else {
     return entry;
@@ -564,8 +564,10 @@ async function linkEntriesByZids(zids, tags, note) {
   for (let i = 1; i < zids.length; i++) {
     let toEntry = await getEntryByZID(zids[i]);
     if (toEntry) {
-      list.push(await linkEntry(fromEntry, toEntry, note));
+      let result = await linkEntry(fromEntry, toEntry, note);
+      list.push(result);
       fromEntry = toEntry;
+      console.log(list);
     }
   }
   return list;

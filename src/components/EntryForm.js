@@ -29,7 +29,7 @@ function useEntryBehavior(props) {
   let entry = props.entry;
   let setEntry = props.setEntry;
   const splitEntry = async () => {
-    let noteBodies = entry.note.split(/\n+/);
+    let noteBodies = entry.Note.split(/\n+/);
     await noteBodies.reduce((prevPromise, cur) => {
       return prevPromise.then((_) => {
         return fetch('/api/entries', {

@@ -24,7 +24,7 @@ import NavBar from './components/NavBar';
 import Uncategorized from './pages/Uncategorized';
 import Incomplete from './pages/Incomplete';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
-import DateFnsUtils from '@date-io/date-fns';
+import DateFnsUtils from '@date-io/moment';
 import { ThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 

@@ -19,7 +19,7 @@ app.get('/thumbnails/:filename', async(req, res) => {
   if (f) {
     res.sendFile(f);
   } else {
-    res.send(404);
+    res.sendStatus(404);
   }
 });
 
@@ -84,7 +84,6 @@ app.post('/api/makeThumbs', async (req, res) => {
 app.put('/api/entries/:id', async (req, res) => {
   var e = await dataLib.getEntryByID(req.body.ID || req.params.id);
   let result = await dataLib.updateEntry(e, req.body);
-  console.log(result, req.body, req.body.ID);
   if (!e) { res.sendStatus(404); }
   else { res.json(result); }
 });
@@ -119,14 +118,14 @@ app.post('/api/entries/tag/bulk', async (req, res) => {
   let tags = req.body.tags;
   let note = req.body.note;
   if (!zids || !tags) { res.send(500); return null; }
-  return dataLib.tagEntriesByZids(zids, tags, note).then(res.json);
+  return dataLib.tagEntriesByZids(zids, tags, note).then((data) => res.json(data));
 });
 
 app.post('/api/entries/link/bulk', async (req, res) => {
   let zids = req.body.zids;
   let note = req.body.note;
   if (!zids) { res.send(500); return null; }
-  return dataLib.linkEntriesByZids(zids, note).then(res.json);
+  return dataLib.linkEntriesByZids(zids, note).then((data) => res.json(data));
 });
 
 app.post('/api/entries/zid/:zid/links', async (req, res) => {

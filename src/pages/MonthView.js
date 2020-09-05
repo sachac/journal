@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { addMonths } from 'date-fns';
 // import { HotKeys } from "react-hotkeys";
 import Button from '@material-ui/core/Button';
 import PhotoList from '../components/PhotoList';
@@ -22,8 +21,8 @@ export default function MonthView() {
   const [ date, setDate ] = useState(dateParam ? new Date(dateParam + '-15') : new Date());
   const { selectedEntries, clickEntry, clearSelection, selectAll } = useSelectEntries({entries});
   const [ unlinkedPhotos, setUnlinkedPhotos ] = useState([]);
-  const previousMonth = () => { setDate(addMonths(date, -1)); };
-  const nextMonth = () => { setDate(addMonths(date, 1)); };
+  const previousMonth = () => { setDate(moment(date).subtract(1, 'month')); };
+  const nextMonth = () => { setDate(moment(date).add(1, 'month')); };
   const onChange = date => { setDate(date); };
   useEffect(() => { history.push('/month/' + moment(date).format('YYYY-MM')); }, [date]);
   
