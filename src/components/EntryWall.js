@@ -56,7 +56,7 @@ export function EntryCard(data) {
   };
   const FeaturedImage = () => {
     if (entry.PictureList && entry.PictureList.length > 0) {
-      return <CardMedia component="img" height="300" image={"/thumbnails/" + entry.PictureList[0]} />;
+      return <CardMedia component="img" loading="lazy" height="300" image={"/thumbnails/" + entry.PictureList[0]} />;
     } else {
       return null;
     }

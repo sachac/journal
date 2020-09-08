@@ -76,7 +76,7 @@ export function DayEntriesView(props) {
       <PhotoList scroll onDelete={handlePhotoDelete} onClick={handlePhotoClick} data={props.data.unlinkedPhotos} selected={selected} />
       <OtherActions selected={selected}/>
       <EntriesView entries={props.data.entries} onClick={handleEntryClick} />
-      <QuickEntryForm selected={selected} date={date} onSubmit={onQuickEntry} photos={selected} />
+      <QuickEntryForm selected={selected} date={props.date} onSubmit={onQuickEntry} photos={selected} />
       {zoomPhotos}
     </div>
   );

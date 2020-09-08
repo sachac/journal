@@ -92,7 +92,7 @@ function useEntryBehavior(props) {
 
 export function QuickEntryForm(props) {
   const classes = useStyles();
-  const [ entry, setEntry ] = useState({Category: '', Note: '', Other: '', Date: moment(props.date).toDate(), PictureList: props.selected});
+  const [ entry, setEntry ] = useState(props.entry || {Category: '', Note: '', Other: '', Date: moment(props.date).toDate(), PictureList: props.selected});
   const [ message, setMessage ] = useState('');
   const onSubmit = function(res) {
     setEntry({Category: '', Note: '', Other: '', Date: moment(props.date).toDate(), PictureList: props.selected});
@@ -105,8 +105,8 @@ export function QuickEntryForm(props) {
   };
   const { handleKey, saveEntry, splitEntry, deleteEntry, handleChange } = useEntryBehavior({entry, setEntry, setMessage, onSubmit: props.onSubmit});
   useEffect(() => { if (props.entry) setEntry(props.entry); }, [props.entry]);
-  useEffect(() => { entry.Date = moment(props.date).toDate(); }, [props.date]);
-  useEffect(() => { entry.PictureList = props.selected; }, [props.selected]);
+  useEffect(() => { setEntry({...entry, Date: moment(props.date).toDate()}); }, [props.date]);
+  useEffect(() => { setEntry({...entry, PictureList: props.selected}); }, [props.selected]);
   return <form className={classes.root} noValidate onSubmit={saveEntry}>
            <TextField label="Note" multiline name='note' value={entry.Note} onChange={handleChange} autoFocus className={classes.note} />
            <TextField label="Other" multiline name='other' value={entry.Other} onChange={handleChange} className={classes.note} />
