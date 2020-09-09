@@ -23,13 +23,13 @@ export default function BulkOperations(data) {
   const handleChange = event => {
     if (event.target.name === 'input') { setInput(event.target.value); }
   };
-  return (<div>
+  return (<div className="horizontal-form">
             <TextField label="Input" value={input} onChange={handleChange} name="input"/>
-            <Button onClick={linkSelected}>Link selected</Button>
-            <Button onClick={tagSelected}>Tag selected</Button>
-            <Button onClick={data.onClear}>Clear selection</Button>
+            <Button onClick={linkSelected}>Link</Button>
+            <Button onClick={tagSelected}>Tag</Button>
+            {selectedEntries.length} selected
+            <Button onClick={data.onClear}>Select none</Button>
             <Button onClick={data.onSelectAll}>Select all</Button>
-            {selectedEntries.length}
           </div>);
 }
 

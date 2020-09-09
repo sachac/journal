@@ -68,16 +68,16 @@ export default function EntriesView(data) {
   const handleClearFilter = () => { setOptions({...options, filter: ''}); };
   
   return (<div>
-            <FormGroup row>
-              <FormControlLabel control={<Checkbox checked={options.other} onChange={handleChange} name="other" />} label="Other"/>
-              <FormControlLabel control={<Checkbox checked={options.images} onChange={handleChange} name="images" />} label="Images"/>
-              <FormControlLabel control={<Checkbox checked={options.private} onChange={handleChange} name="private" />} label="Private"/>
+            <FormGroup row className="horizontal-form">
               <TextField label="Filter" value={options.filter || ''} onChange={handleChange} name="filter" InputProps={{
                 endAdornment: <InputAdornment position="end">
                                 <IconButton onClick={handleClearFilter} style={{order: 1}}>
                                   <ClearIcon color="disabled" fontSize="small" />
                                 </IconButton>
                               </InputAdornment>}}/>
+              <FormControlLabel control={<Checkbox checked={options.other} onChange={handleChange} name="other" />} label="Other"/>
+              <FormControlLabel control={<Checkbox checked={options.images} onChange={handleChange} name="images" />} label="Images"/>
+              <FormControlLabel control={<Checkbox checked={options.private} onChange={handleChange} name="private" />} label="Private"/>
             </FormGroup>
             <Tabs value={view} onChange={changeView} aria-label="view type">
               <Tab name="view" value="tree" label="Tree"/>

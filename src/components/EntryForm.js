@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import history from "../history";
 import TextField from '@material-ui/core/TextField';
+import __ from 'lodash';
 import { Link } from 'react-router-dom';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
@@ -44,7 +46,7 @@ function useEntryBehavior(props) {
   };
   const saveEntry = () => {
     if (entry.ID) {
-      fetch('/api/entries/' + entry.ID, {
+      return fetch('/api/entries/' + entry.ID, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json' },
         body: JSON.stringify(entry)
@@ -54,7 +56,7 @@ function useEntryBehavior(props) {
           if (props.onSubmit) { props.onSubmit(res); }
         });
     } else {
-      fetch('/api/entries', {
+      return fetch('/api/entries', {
         method: 'POST',
         headers: {'Content-Type': 'application/json' },
         body: JSON.stringify(entry)
@@ -95,15 +97,17 @@ export function QuickEntryForm(props) {
   const [ entry, setEntry ] = useState(props.entry || {Category: '', Note: '', Other: '', Date: moment(props.date).toDate(), PictureList: props.selected});
   const [ message, setMessage ] = useState('');
   const onSubmit = function(res) {
-    setEntry({Category: '', Note: '', Other: '', Date: moment(props.date).toDate(), PictureList: props.selected});
-    if (props.onSubmit) { props.onSubmit(res); }
+    return Promise.resolve(props.onSubmit ? props.onSubmit(res) : res).then(function(res) {
+      setEntry({Category: '', Note: '', Other: '', Date: moment(props.date).toDate(), PictureList: []});
+    });
   };
   const linkEntryWhileEditing = function(ref, linkTo) {
     if (linkTo && entry && !((entry.Other || '').match('ref:' + linkTo.ZIDString))) {
       setEntry({...entry, Other: entry.Other + "\nref:" + linkTo.ZIDString});
     }
   };
-  const { handleKey, saveEntry, splitEntry, deleteEntry, handleChange } = useEntryBehavior({entry, setEntry, setMessage, onSubmit: props.onSubmit});
+  
+  const { handleKey, saveEntry, splitEntry, deleteEntry, handleChange } = useEntryBehavior({entry, setEntry, setMessage, onSubmit: onSubmit});
   useEffect(() => { if (props.entry) setEntry(props.entry); }, [props.entry]);
   useEffect(() => { setEntry({...entry, Date: moment(props.date).toDate()}); }, [props.date]);
   useEffect(() => { setEntry({...entry, PictureList: props.selected}); }, [props.selected]);
@@ -114,7 +118,7 @@ export function QuickEntryForm(props) {
            <FormActions saveEntry={saveEntry} splitEntry={splitEntry} deleteEntry={deleteEntry} id={entry && entry.ID} />
            <Link to={"/entries/" + (props.entry && props.entry.ID ? props.entry.ID : 'new')}>Full form</Link> {message}
            <QuickSearchForRef zid={entry.ZIDString} onClick={linkEntryWhileEditing} />
-  </form>;
+         </form>;
 }
 
 
@@ -169,12 +173,24 @@ export default function EntryForm(props) {
   const queryString = require('query-string');
   const parsed = queryString.parse(props.location && props.location.search);
   const [dateData, setDateData] = useState({});
+  const [quick, setQuick] = useState(parsed.quick);
   const [entry, setEntry] = useState({Note: '',
                                       Other: '',
                                       PictureList: props.photos || (parsed.filename ? [parsed.filename] : []),
                                       Date: props.date,
                                       Time: moment(props.Date).format('HH:mm:ss'),
                                       Category: ''});
+  useEffect(() => {
+    setEntry({...entry, ...__.pick(parsed, ['Note', 'Other', 'Category']) });
+  }, []);
+  useEffect(() => {
+    if (quick && entry && entry.Note) {
+      saveEntry();
+      setQuick(false);
+      console.log(entry);
+      history.push('/new');
+    }
+  }, [entry]);
   const [message, setMessage] = useState('');
   
   const { saveEntry, splitEntry, deleteEntry, handleChange, handleKey } = useEntryBehavior({entry, setEntry, setMessage});

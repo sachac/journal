@@ -24,7 +24,7 @@ export default function ZIDList(props) {
             <div style={{position: 'sticky', top: 0, background: '#303030'}}>
               <BulkOperations entries={entries} selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
             </div>
-            <EntriesView entries={entries} selected={selectedEntries} />
+            <EntriesView clickEntry={clickEntry} entries={entries} selected={selectedEntries} />
             <BulkOperations entries={entries} selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
             <SelectedInfo entries={entries} selected={selectedEntries} />
          </div>);

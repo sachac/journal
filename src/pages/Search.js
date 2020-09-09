@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
@@ -6,7 +6,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import { objToQueryString } from '../App';
-import { debounce } from 'throttle-debounce';
 import Checkbox from '@material-ui/core/Checkbox';
 import EntriesView from '../components/EntriesView';
 import BulkOperations, { SelectedInfo } from '../components/BulkOperations';

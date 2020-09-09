@@ -538,7 +538,6 @@ async function linkEntry(entry, toEntry, note) {
   }
   if (!(entry.Other || '').match('ref:' + toEntry)) {
     entry.Other = (entry.Other ? entry.Other + "\n" : '') + "ref:" + toEntry + (note ? ' ' + note : '');
-    console.log(entry.Other);
     return entry.save();
   } else {
     return entry;
@@ -551,7 +550,7 @@ async function tagEntriesByZids(zids, tags, note) {
     return prev.then(async (_) => {
       let entry = await getEntryByZID(zid);
       entry = tagEntry(entry, tags, note);
-      return _.append(entry);
+      return _.concat(entry);
     });
   }, Promise.resolve([]));
 }
@@ -567,7 +566,6 @@ async function linkEntriesByZids(zids, tags, note) {
       let result = await linkEntry(fromEntry, toEntry, note);
       list.push(result);
       fromEntry = toEntry;
-      console.log(list);
     }
   }
   return list;

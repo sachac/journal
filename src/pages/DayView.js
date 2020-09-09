@@ -92,31 +92,11 @@ export default function DayView() {
     history.push('/day/' + moment(date).format('YYYY-MM-DD'));
   };
   useEffect(() => { getData(); }, [date]);
-  // clickPhoto = (event) => {
-  //     var f = event.target.getAttribute('data-filename');
-  //     this.setState({selectedPhotos: this.state.selectedPhotos.push(f)});
-  // };
-  // clickEntry = (event) => {
-  //     var id = event.target.getAttribute('data-id');
-  //     if (this.state.selectedPhotos.length > 0) {
-  //         console.log('Trying to link', id, this.state.selectedPhotos);
-  //         fetch('/api/entries/' + id + '/pictures', {
-  //             method: 'POST',
-  //             headers: {'Content-Type': 'application/json' },
-  //             body: JSON.stringify({filenames: this.state.selectedPhotos})
-  //         }).then(() => {
-  //             this.setState({selectedPhotos: []});
-  //             this.getData();
-  //         });
-  //     }
-  // }
-
   const getData = async() => {
     return fetch('/api/date/' + moment(date).format('YYYY-MM-DD'))
       .then(res => res.json())
       .then(data => setData(data));
   };
-  
   return (
     <div>
       <Button color="inherit" component={Link} to={'/month/' + moment(date).format('YYYY-MM')}>View by month</Button>
