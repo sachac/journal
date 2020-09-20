@@ -64,7 +64,7 @@ A.date-link:hover { text-decoration: underline }
 .hasSelected .entryItem:hover { background: darkgray }
 .link { display: none }
 .photoList { float: right; marginLeft: 5 }
-.large .photoList img { max-width: 100%; height: auto; max-height: 500px }
+.large .photoList img { max-width: 100%; height: auto; max-height: 500px; padding: 8px; margin: 0 }
 
 .other { color: gray }
 a { color: lightblue }

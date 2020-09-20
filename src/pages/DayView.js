@@ -7,6 +7,7 @@ import { QuickEntryForm } from '../components/EntryForm';
 import DateSelector from '../components/DateSelector';
 import EntriesView from '../components/EntriesView';
 import { Link, useParams } from "react-router-dom";
+import Grid from '@material-ui/core/Grid';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import moment from 'moment';
 // const keyMap = {
@@ -77,7 +78,6 @@ export function DayEntriesView(props) {
       <OtherActions selected={selected}/>
       <EntriesView entries={props.data.entries} onClick={handleEntryClick} />
       <QuickEntryForm selected={selected} date={props.date} onSubmit={onQuickEntry} photos={selected} />
-      {zoomPhotos}
     </div>
   );
 
