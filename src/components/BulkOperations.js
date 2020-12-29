@@ -6,19 +6,38 @@ import { Link } from 'react-router-dom';
 export default function BulkOperations(data) {
   let selectedEntries = data.selected;
   const [ input, setInput ] = useState('');
+  const [ message, setMessage ] = useState('');
+  const onDone = (op, res) => {
+    setMessage(op);
+    if (data.onDone) { data.onDone(op, res); }
+  };
   const tagSelected = () => {
+    setMessage('');
     fetch('/api/entries/tag/bulk', {
       method: 'POST',
       body: JSON.stringify({tags: input.split(/ /), zids: data.selected}),
       headers: {'Content-Type': 'application/json'}}).then(res => res.json())
-      .then((res) => { if (data.onDone) { data.onDone('tagged', res); }});
+      .then((res) => { onDone('tagged', res); });
   };
   const linkSelected = () => {
+    setMessage('');
     fetch('/api/entries/link/bulk', {
       method: 'POST',
       body: JSON.stringify({note: input, zids: data.selected}),
       headers: {'Content-Type': 'application/json'}}).then(res => res.json())
-      .then((res) => { if (data.onDone) { data.onDone('tagged', res); }});
+      .then((res) => { onDone('tagged', res); });
+  };
+  const clearExported = () => {
+    setMessage('');
+    fetch('/api/export', { method: 'DELETE'}).then(() => onDone('cleared export'));
+  };
+  const exportThumbs = () => {
+    fetch('/api/export/thumbnails', {
+      method: 'POST',
+      body: JSON.stringify({zids: data.selected}),
+      headers: {'Content-Type': 'application/json'}}).then(res => res.json()).then((res) => {
+        onDone('exported', res); 
+      });
   };
   const handleChange = event => {
     if (event.target.name === 'input') { setInput(event.target.value); }
@@ -30,6 +49,9 @@ export default function BulkOperations(data) {
             {selectedEntries.length} selected
             <Button onClick={data.onClear}>Select none</Button>
             <Button onClick={data.onSelectAll}>Select all</Button>
+            <Button onClick={clearExported}>Clear exported</Button>
+            <Button onClick={exportThumbs}>Export thumbnails</Button>
+            {message}
           </div>);
 }
 

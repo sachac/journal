@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { EntryCard } from '../components/EntryWall';
 import { QuickSearchForRef } from '../components/EntryForm';
 
-export default function ZIDView(data) {
+export default function ZIDView() {
     const { zidParam } = useParams();
     const [ entry, setEntry ] = useState(null);
     const [ forwardLinks, setForwardLinks ] = useState([]);

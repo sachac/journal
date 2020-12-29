@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import history from "../history";
+import PropTypes from 'prop-types';
 // import { HotKeys } from "react-hotkeys";
 import Button from '@material-ui/core/Button';
 import PhotoList from '../components/PhotoList';
 import { QuickEntryForm } from '../components/EntryForm';
 import DateSelector from '../components/DateSelector';
 import EntriesView from '../components/EntriesView';
+import BulkOperations, { SelectedInfo } from '../components/BulkOperations';
 import { Link, useParams } from "react-router-dom";
-import Grid from '@material-ui/core/Grid';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import moment from 'moment';
 // const keyMap = {
@@ -15,6 +16,7 @@ import moment from 'moment';
 //     NEXT: "right"
 // };
 
+import useSelectEntries from '../hooks/useSelectEntries';
 
 export function DayEntriesView(props) {
   let date = props.date;
@@ -23,6 +25,8 @@ export function DayEntriesView(props) {
   const handlePhotoClick = (e, p) => {
     setSelected((selected.includes(p)) ? selected.filter(d => d !== p) : selected.concat(p));
   };
+  const [ entries ] = useState([]);
+  const { selectedEntries, clickEntry, clearSelection, selectAll } = useSelectEntries({entries});
   const handleEntryClick = (event, entry) => {
     if (selected.length > 0) {
       fetch('/api/entries/' + entry.ID + '/pictures', {
@@ -34,10 +38,12 @@ export function DayEntriesView(props) {
         setSelected([]);
         props.getData && props.getData();
       });
+    } else {
+      clickEntry(event, entry);
     }
   };
   
-  const handlePhotoDelete = (e) => {
+  const handlePhotoDelete = () => {
     if (selected.length === 0) return null;
     return Promise.all(selected.map((s) => {
       return fetch('/api/pictures/' + s, {
@@ -53,7 +59,7 @@ export function DayEntriesView(props) {
     setSelected([]);
     props.getData && props.getData();
   };
-  const OtherActions = (data) => {
+  const OtherActions = () => {
     if (selected.length === 0) return null;
     return <ButtonGroup>
                      <Button onClick={handlePhotoDelete}>Delete</Button>
@@ -63,25 +69,34 @@ export function DayEntriesView(props) {
                    </ButtonGroup>;
   };
 
-  const handleSameAsPrevious = (e) => {
+  const handleSameAsPrevious = () => {
     handleEntryClick(null, lastEntry);
   };
 
-  let zoomPhotos = <div/>;
+  
+  /*let zoomPhotos = <div/>;
   if (selected.length > 0) {
     zoomPhotos = <div className="large"><PhotoList onClick={handlePhotoClick} data={selected} selected={selected}/></div>;
-  }
+  }*/
 
   return (
     <div className={selected.length > 0 ? 'hasSelected' : ''}>
+      <BulkOperations entries={entries} selected={selectedEntries} onDone={props.onDone} onClear={clearSelection} onSelectAll={selectAll}/>
       <PhotoList scroll onDelete={handlePhotoDelete} onClick={handlePhotoClick} data={props.data.unlinkedPhotos} selected={selected} />
       <OtherActions selected={selected}/>
-      <EntriesView entries={props.data.entries} onClick={handleEntryClick} />
+      <EntriesView entries={props.data.entries} onClick={handleEntryClick} selected={selectedEntries} />
       <QuickEntryForm selected={selected} date={props.date} onSubmit={onQuickEntry} photos={selected} />
+      <SelectedInfo entries={entries} selected={selectedEntries} />
     </div>
   );
 
 }
+DayEntriesView.propTypes = {
+    date: PropTypes.object,
+    getData: PropTypes.func,
+    onDone: PropTypes.func,
+    data: PropTypes.object
+};
 
 export default function DayView() {
   const { dateParam } = useParams();
@@ -101,7 +116,7 @@ export default function DayView() {
     <div>
       <Button color="inherit" component={Link} to={'/month/' + moment(date).format('YYYY-MM')}>View by month</Button>
       <DateSelector value={date} onChange={onChange} />
-      <DayEntriesView date={date} data={data} getData={getData} />
+      <DayEntriesView date={date} data={data} getData={getData} onDone={getData} />
     </div>
   );
 }

@@ -46,7 +46,7 @@ export default function MonthView() {
   // }
 
   const [ sort, setSort ] = useState('category');
-  const toggleSort = (e, p) => {
+  const toggleSort = () => {
     if (sort === 'category') {
       setSort('zid');
     } else {

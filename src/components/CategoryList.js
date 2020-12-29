@@ -14,6 +14,6 @@ export default function CategoryList(data) {
              <MenuItem value={c} key={key}>{c}</MenuItem>
            ); })}
          </TextField>;
-};
+}
 
 

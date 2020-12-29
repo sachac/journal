@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PhotoList from './PhotoList';
+import PropTypes from 'prop-types';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import { Link } from 'react-router-dom';
@@ -28,11 +29,17 @@ export default function EntryItem(data) {
       let other = (data.options && data.options.other !== false) ? <EntryNote className="other" value={entry.Other}/> : null;
       let images = (data.options && data.options.images !== false) ? <PhotoList data={entry.PictureList} /> : null;
       return <div className={classes} onClick={(e) => data.onClick && data.onClick(e, entry)}>{images}
-               <IconButton onClick={(e) => { setEditing(!isEditing); } }><EditIcon fontSize="small"/></IconButton>
+               <IconButton onClick={() => { setEditing(!isEditing); } }><EditIcon fontSize="small"/></IconButton>
                <EntryNote value={entry.Note} /> {other} ({zidLink})
              </div>;
     }
   } else {
     return null;
   }
+}
+EntryItem.propTypes = {
+    onClick: PropTypes.func,
+    options: PropTypes.object,
+    entry: PropTypes.object,
+    onSubmit: PropTypes.func
 };

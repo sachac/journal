@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 function markupLinks(s) {
     if (!s) return null;
@@ -15,8 +16,11 @@ function markupLinks(s) {
                           return x;
                       });
     return v;
-};
+}
     
 export default function EntryNote(data) {
     return <span className={data.className} dangerouslySetInnerHTML={{__html: markupLinks(data.value)}} />;
+}
+EntryNote.propTypes = {
+    className: PropTypes.string
 }

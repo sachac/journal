@@ -4,7 +4,7 @@ import './EntryWall.css';
 import groupBy from 'lodash/groupBy';
 import EntryItem from './EntryItem.js';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   root: {
     margin: 20,
     '& .photoList': { float: 'right', marginLeft: 5 },

@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import OverflowWrapper from 'react-overflow-wrapper';
 import SimpleReactLightbox, { SRLWrapper } from "simple-react-lightbox";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   scrollMenu: { position: 'sticky', top: 0, zIndex: 2 },
   delete: { position: 'absolute', right: 0, bottom: 0 },
   selected: { position: 'relative', border: '2px solid blue', height: 100 },
