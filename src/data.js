@@ -295,6 +295,9 @@ async function getEntries(params) {
   if (params.withPhotos && params.withPhotos !== '0') {
     search['Pictures'] = {'$ne': ''};
   }
+  if (params.tag) {
+    search['Other'] = new RegExp('#' + params.tag + '([\t\r\n,; ]|$)', 'i');
+  }
   if (params.q) {
     if (params.regex && params.regex !== '0') {
       search['$or'] = [

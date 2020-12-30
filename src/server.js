@@ -40,6 +40,7 @@ app.get('/api/date/:date', async (req, res) => { res.json(await dataLib.getDateD
 app.get('/api/photos', async (req, res) => { res.json(await dataLib.getPhotos(req.query)); });
 app.get('/api/entries', async (req, res) => { res.json(await dataLib.getEntries(req.query)); });
 app.get('/api/entries.csv', async (req, res) => { res.send(await dataLib.entriesAsCSV(req.query)); });
+app.get('/api/entries/tag/:tag', async (req, res) => { res.send(await dataLib.getEntries({...req.query, tag: req.params.tag})); });
 app.get('/api/entries/random', async (req, res) => { res.json(await dataLib.getRandom(req.query)); });
 app.get('/api/entries/uncategorized', async (req, res) => { res.json(await dataLib.getUncategorized(req.query)); });
 app.get('/api/entries/incomplete', async (req, res) => { res.json(await dataLib.getIncomplete(req.query)); });
