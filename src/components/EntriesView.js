@@ -37,7 +37,7 @@ GalleryView.propTypes = {
 function EntriesView(data) {
   let entries;
   const [ entryList, setEntryList ] = useState(data.entries);
-  const [ options, setOptions ] = useState({other: true, images: true, private: true, filter: ''});
+  const [ options, setOptions ] = useState({other: true, images: true, private: true, filter: '', exclude: ''});
   const [ view, setView ] = useState(data.view || 'tree');
   const changeView = (event, newValue) => {
     setView(newValue);
@@ -48,7 +48,12 @@ function EntriesView(data) {
       filtered = filtered.filter((o) => !o.isPrivate);
     }
     if (options.filter) {
-      filtered = filtered.filter((o) => ([(o.Category || ''), (o.Note || ''), (o.Other || '')].join(' ')).match(new RegExp(options.filter, 'i')));
+      filtered = filtered.filter((o) => ([(o.Category || ''), (o.Note || ''), (o.Other || '')].join(' '))
+                                 .match(new RegExp(options.filter, 'i')));
+    }
+    if (options.exclude) {
+      filtered = filtered.filter((o) => !(([(o.Category || ''), (o.Note || ''), (o.Other || '')].join(' '))
+                                          .match(new RegExp(options.exclude, 'i'))));
     }
     return filtered;
   };
@@ -60,6 +65,7 @@ function EntriesView(data) {
     if (event.target.name === 'images') { setOptions({...options, images: event.target.checked}); }
     if (event.target.name === 'private') { setOptions({...options, private: event.target.checked}); }
     if (event.target.name === 'filter') { setOptions({...options, filter: event.target.value}); }
+    if (event.target.name === 'exclude') { setOptions({...options, exclude: event.target.value}); }
   };
   if (view === 'cards') {
     entries = <EntryWall {...data} entries={entryList} options={options} includeDate={true} />;
@@ -71,12 +77,19 @@ function EntriesView(data) {
     entries = <EntryTree {...data} entries={entryList} options={options} sort="date" />;
   }
   const handleClearFilter = () => { setOptions({...options, filter: ''}); };
+  const handleClearExclude = () => { setOptions({...options, exclude: ''}); };
   
   return (<div>
             <FormGroup row className="horizontal-form">
               <TextField label="Filter" value={options.filter || ''} onChange={handleChange} name="filter" InputProps={{
                 endAdornment: <InputAdornment position="end">
                                 <IconButton onClick={handleClearFilter} style={{order: 1}}>
+                                  <ClearIcon color="disabled" fontSize="small" />
+                                </IconButton>
+                              </InputAdornment>}}/>
+              <TextField label="Exclude" value={options.exclude || ''} onChange={handleChange} name="exclude" InputProps={{
+                endAdornment: <InputAdornment position="end">
+                                <IconButton onClick={handleClearExclude} style={{order: 1}}>
                                   <ClearIcon color="disabled" fontSize="small" />
                                 </IconButton>
                               </InputAdornment>}}/>
