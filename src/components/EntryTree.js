@@ -50,7 +50,7 @@ export default function EntryTree(data) {
     } else {
         if (data.entries) {
             return <ul className={classes.root}>{
-              data.entries.sort((a, b) => { return a.ZIDString > b.ZIDString ? -1 : 1; }).map((e, k) => {
+              data.entries.map((e, k) => {
                 return <li key={k}><EntryItem entry={e} {...data} /></li>;
               })}</ul>;
         } else {
