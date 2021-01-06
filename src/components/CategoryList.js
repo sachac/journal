@@ -2,18 +2,43 @@ import TextField from '@material-ui/core/TextField';
 import React from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 
-const categories = ['',
-                    'Gross motor',
-                    'Eating',
-                    'Meta',
-                    'Fine motor', 'Language', 'Kaizen', 'Us', 'Self-care and independence', 'Social', 'Other', 'Household', 'Field trip', 'Pretend', 'Music', 'Oops', 'Sensory', 'Cognition', 'Emotion', 'Consulting', 'Track', 'Art', 'World', 'Thoughts', 'Interests', 'Sleep'].sort();
+export const categories = ['Uncategorized',
+                           'Kaizen',
+                           'Thoughts',
+                           'Us',
+                           'Consulting',
+                           'Oops',
+                           'Meta',
+                           'Gross motor',
+                           'Fine motor',
+                           'Eating',
+                           'Language',
+                           'Kaizen',
+                           'Self-care and independence',
+                           'Social',
+                           'Household',
+                           'Field trip',
+                           'Pretend',
+                           'Music',
+                           'Sensory',
+                           'Cognition',
+                           'Emotion',
+                           'Art',
+                           'World',
+                           'Interests',
+                           'Sleep',
+                           'Other',
+                           'Track',
+                          ];
+export const alphaCategories = categories.slice().sort();
 
 export default function CategoryList(data) {
   return <TextField label="Category" select name='category' value={data.value || ''} onChange={data.onChange} onKeyPress={data.onKeyPress} style={{width: '100%'}}>
-           {categories.map((c, key) => { return (
-             <MenuItem value={c} key={key}>{c}</MenuItem>
-           ); })}
-         </TextField>;
+      <MenuItem/>
+      {alphaCategories.map((c, key) => { return (
+        <MenuItem value={c} key={key}>{c}</MenuItem>
+      ); })}
+    </TextField>;
 }
 
 
