@@ -163,7 +163,13 @@ function formatZIDString(d) {
 function getDaySpan(date) {
   if (typeof date == 'string') {
     date = date.replace(/[^0-9]/g, '');
-    if (date.length == 6) {
+    if (date.length == 4) {
+      let dateToMatch = moment(date + '0101', 'YYYYMMDD').startOf('day');
+      console.log(date, dateToMatch);
+      let lt = moment(dateToMatch).add(1, 'year').toDate();
+      return {$gte: dateToMatch.toDate(), $lt: lt};
+    }
+    else if (date.length == 6) {
       let dateToMatch = moment(date + '01', 'YYYYMMDD').startOf('day');
       let lt = moment(dateToMatch).add(1, 'months').toDate();
       return {$gte: dateToMatch.toDate(), $lt: lt};
@@ -560,6 +566,17 @@ async function tagEntriesByZids(zids, tags, note) {
 }
 module.exports.tagEntriesByZids = tagEntriesByZids;
 
+async function untagEntriesByZids(zids, tags, note) {
+  return zids.reduce(async (prev, zid) => {
+    return prev.then(async (_) => {
+      let entry = await getEntryByZID(zid);
+      entry = untagEntry(entry, tags, note);
+      return _.concat(entry);
+    });
+  }, Promise.resolve([]));
+}
+module.exports.untagEntriesByZids = untagEntriesByZids;
+
 function exportThumbnailsForEntry(directory, entry) {
   return entry.PictureList.reduce(async (prev, filename) => {
     return prev.then(async (prevVal) => {
@@ -620,6 +637,20 @@ async function tagEntry(entry, tags, note) {
   } else {
     return entry;
   }
+}
+module.exports.tagEntry = tagEntry;
+
+function escapeRegex(string) {
+    return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
+
+async function untagEntry(entry, tags, note) {
+  entry.Other = entry.Other || '';
+  tags = (Array.isArray(tags)) ? tags : [tags];
+  tags.map((tag) => {
+    entry.Other = entry.Other.replace(new RegExp('#' + escapeRegex(tag) + '([ \t\r\n]|$)', 'i'), '');
+  });
+  return entry.save();
 }
 module.exports.tagEntry = tagEntry;
 
