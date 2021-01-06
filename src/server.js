@@ -133,6 +133,14 @@ app.post('/api/entries/tag/bulk', async (req, res) => {
   return dataLib.tagEntriesByZids(zids, tags, note).then((data) => res.json(data));
 });
 
+app.delete('/api/entries/tag/bulk', async (req, res) => {
+  let zids = req.body.zids;
+  let tags = req.body.tags;
+  let note = req.body.note;
+  if (!zids || !tags) { res.send(500); return null; }
+  return dataLib.untagEntriesByZids(zids, tags, note).then((data) => res.json(data));
+});
+
 app.post('/api/entries/link/bulk', async (req, res) => {
   let zids = req.body.zids;
   let note = req.body.note;

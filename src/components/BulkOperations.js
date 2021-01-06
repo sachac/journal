@@ -19,6 +19,14 @@ export default function BulkOperations(data) {
       headers: {'Content-Type': 'application/json'}}).then(res => res.json())
       .then((res) => { onDone('tagged', res); });
   };
+  const untagSelected = () => {
+    setMessage('');
+    fetch('/api/entries/tag/bulk', {
+      method: 'DELETE',
+      body: JSON.stringify({tags: input.split(/ /), zids: data.selected}),
+      headers: {'Content-Type': 'application/json'}}).then(res => res.json())
+      .then((res) => { onDone('untagged', res); });
+  };
   const linkSelected = () => {
     setMessage('');
     fetch('/api/entries/link/bulk', {
@@ -46,6 +54,7 @@ export default function BulkOperations(data) {
             <TextField label="Input" value={input} onChange={handleChange} name="input"/>
             <Button onClick={linkSelected}>Link</Button>
             <Button onClick={tagSelected}>Tag</Button>
+            <Button onClick={untagSelected}>Untag</Button>
             {selectedEntries.length} selected
             <Button onClick={data.onClear}>Select none</Button>
             <Button onClick={data.onSelectAll}>Select all</Button>
