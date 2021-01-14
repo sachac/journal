@@ -193,7 +193,7 @@ export function QuickSearchForRef(props) {
   return (<div>
             <TextField label="search" name="search" value={query} onBlur={getData} onChange={handleChange} />
             <IconButton onClick={getData}><SearchIcon/></IconButton>
-            <EntryList entries={entries} onClick={props.onClick} selected={selected}/>
+            <EntryList entries={entries} onClick={props.onClick} selected={selected} options={{other: true}}/>
           </div>);
 }
 

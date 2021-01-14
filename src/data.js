@@ -431,7 +431,8 @@ async function makeThumbnail(o) {
   return fs.access(process.env.THUMBNAILS_DIR + path.basename(o))
     .then(function() { })
     .catch(async function(err) {
-      if (!o.match(/\.jpg$/)) return null;
+      if (!o.match(/\.(jpg|png)$/)) return null;
+      console.log('Making thumbnail for ', o);
       console.log('Resizing ' + o);
       let orig = await findOriginalPicture(o);
       if (orig) {
@@ -556,6 +557,40 @@ async function tagEntriesByZids(zids, tags, note) {
 }
 module.exports.tagEntriesByZids = tagEntriesByZids;
 
+function exportThumbnailsForEntry(directory, entry) {
+  return entry.PictureList.reduce(async (prev, filename) => {
+    return prev.then(async (prevVal) => {
+      let location = await findImageInDir(process.env.THUMBNAILS_DIR, filename);
+      if (location) {
+        console.log(location, filename, prevVal);
+        return fs.copyFile(location, path.join(directory, filename)).then(() => {
+          prevVal.push([filename, 'success']);
+          return prevVal;
+        }).catch((err) => {
+          prevVal.push([filename, 'error', err]);
+          return prevVal;
+        });
+      } else {
+        prevVal.push([filename, 'not found']);
+        return prevVal;
+      }
+    });
+  }, Promise.resolve([]));
+}
+function exportThumbnails(zids) {
+  if (!process.env.EXPORT_DIR) throw 'Directory not specified.';
+  if (!zids) throw 'ZIDs not specified.';
+  return zids.reduce((prev, zid) => {
+    return prev.then(async (_) => {
+      let entry = await getEntryByZID(zid);
+      let list = await exportThumbnailsForEntry(process.env.EXPORT_DIR, entry);
+      console.log(list);
+      return _.concat(list);
+    });
+  }, Promise.resolve([]));
+}
+module.exports.exportThumbnails = exportThumbnails;
+
 async function linkEntriesByZids(zids, tags, note) {
   zids = zids.sort().reverse();
   let fromEntry = await getEntryByZID(zids[0]);
@@ -657,4 +692,24 @@ function connect() {
   return mongoose
     .connect(process.env.MONGODB, { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true });
 }
+
 module.exports.connect = connect;
+
+async function clearExports() {
+  console.log(process.env.EXPORT_DIR);
+  if (!process.env.EXPORT_DIR) throw 'Directory not specified.';
+  let directory = process.env.EXPORT_DIR;
+  return fs.readdir(directory).then(async (files) => {
+    return files.reduce((prev, file) => {
+      return prev.then(async (_) => {
+        if (file.match(/\.jpg$|\.png$/i)) {
+          console.log(path.join(directory, file));
+          return fs.unlink(path.join(directory, file));
+        } else {
+          return null;
+        }
+      });
+    }, Promise.resolve([]));
+  });
+}
+module.exports.clearExports = clearExports;

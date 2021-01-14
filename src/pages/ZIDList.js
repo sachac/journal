@@ -20,11 +20,16 @@ export default function ZIDList(props) {
   };
   const bulkDone = () => { fetchEntries(zids); };
   useEffect(() => { fetchEntries(zids); }, [zids]);
+  const testClick = (event, entry) => {
+    console.log(event, entry);
+    clickEntry(event, entry);
+    
+  };
   return (<div>
             <div style={{position: 'sticky', top: 0, background: '#303030'}}>
               <BulkOperations entries={entries} selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
             </div>
-            <EntriesView clickEntry={clickEntry} entries={entries} selected={selectedEntries} />
+            <EntriesView clickEntry={testClick} entries={entries} selected={selectedEntries} />
             <BulkOperations entries={entries} selected={selectedEntries} onDone={bulkDone} onClear={clearSelection} onSelectAll={selectAll}/>
             <SelectedInfo entries={entries} selected={selectedEntries} />
          </div>);

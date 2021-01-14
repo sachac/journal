@@ -5,7 +5,7 @@ import EntryItem from './EntryItem';
 export default function EntryList(data) {
     return <ul>
              {data.entries.map((entry) => {
-               return <li key={entry.ZIDString}><EntryItem entry={entry} onClick={data.onClick} linkDate="true" selected={data.selected}/></li>;
+               return <li key={entry.ZIDString}><EntryItem entry={entry} linkDate="true" {...data}/></li>;
              })}
            </ul>;
 };

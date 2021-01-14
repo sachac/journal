@@ -113,6 +113,17 @@ app.post('/api/entries/zid/:zid/tags/:tag', async (req, res) => {
     res.sendStatus(404);
   }
 });
+
+app.delete('/api/export', async (req, res) => {
+  console.log('Trying to clear...');
+  return dataLib.clearExports().then(() => res.sendStatus(200))
+    //.catch(() => res.sendStatus(500));
+});
+app.post('/api/export/thumbnails', async (req, res) => {
+  return dataLib.exportThumbnails(req.body.zids).then((data) => res.json(data))
+    //.catch(() => res.sendStatus(500));
+});
+
 app.post('/api/entries/tag/bulk', async (req, res) => {
   let zids = req.body.zids;
   let tags = req.body.tags;
