@@ -25,7 +25,7 @@ export function DayEntriesView(props) {
   const handlePhotoClick = (e, p) => {
     setSelected((selected.includes(p)) ? selected.filter(d => d !== p) : selected.concat(p));
   };
-  const [ entries, setEntries ] = useState([]);
+  const [ entries ] = useState([]);
   const { selectedEntries, clickEntry, clearSelection, selectAll } = useSelectEntries({entries});
   const handleEntryClick = (event, entry) => {
     if (selected.length > 0) {
@@ -75,7 +75,6 @@ export function DayEntriesView(props) {
 
   
 
-  let zoomPhotos = <div/>;
   /*let zoomPhotos = <div/>;
   if (selected.length > 0) {
     zoomPhotos = <div className="large"><PhotoList onClick={handlePhotoClick} data={selected} selected={selected}/></div>;

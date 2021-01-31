@@ -6,7 +6,6 @@ import { DatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import BulkOperations, { SelectedInfo } from '../components/BulkOperations';
 import history from "../history";
-import { objToQueryString } from '../App';
 
 const queryString = require('query-string');
 
