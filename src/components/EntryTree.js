@@ -50,7 +50,9 @@ export default function EntryTree(data) {
     return <ul className={classes.root}>{
       categories.map((e) => {
         if (byCategory[e] && byCategory[e].length > 0) {
-          return <CategoryTree {...data} key={e[0]} selected={data.selected} category={e} entries={byCategory[e]}  />;
+          return <CategoryTree {...data} key={e} selected={data.selected} category={e} entries={byCategory[e]}  />;
+        } else {
+          return null;
         }
       })}</ul>;
   } else if (data.entries) {
