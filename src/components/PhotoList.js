@@ -22,7 +22,7 @@ function Photo(data) {
         return <img loading="lazy" onClick={(e) => handleClick(e, data.photo[0])} alt={data.photo[0]}
                     className={classes[data.isSelected ? 'selected' : 'img']}
                     data-filename={data.photo[0]} src={'/thumbnails/' + encodeURIComponent(data.photo[0])} />;
-    } else {
+    } else if (data.photo) {
         return <img loading="lazy" onClick={(e) => handleClick(e, data.photo.filename)} alt={data.photo.filename}
                     className={classes[data.isSelected ? 'selected' : 'img']}
                     data-filename={data.photo.filename} src={'/thumbnails/' + encodeURIComponent(data.photo.filename)} />;

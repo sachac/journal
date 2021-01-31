@@ -121,15 +121,33 @@ export default function DayView() {
   const next = () => { setDate(moment(date).add(1, granularity)); };
   useEffect(() => { getData(); }, [date, granularity]);
   const getData = async() => {
-    return fetch('/api/date/' + moment(date).format(formats[granularity]))
+    if (granularity == 'week') {
+      let d = moment(date);
+      let start = (moment(date).day() == 6) ? moment(date) : moment(date).subtract(moment(date).day() + 1, 'day');
+      let url = '/api/entries?from=' + start.format(formats['day'])
+          + '&to=' + moment(start).add(1, 'week').format(formats['day']);
+      return fetch(url)
+        .then(res => res.json())
+        .then(data => setData({entries: data}));
+    }
+    else if (granularity == 'month') {
+      let url = '/api/entries?from=' + moment(date).startOf('month').format(formats['day'])
+          + '&to=' + moment(date).startOf('month').add(1, 'month').format(formats['day']);
+      return fetch(url)
+        .then(res => res.json())
+        .then(data => setData({entries: data}));
+    } else {
+      let url = '/api/date/' + moment(date).format(formats[granularity]);
+      return fetch(url)
       .then(res => res.json())
       .then(data => setData(data));
+    }
   };
   const chooseGranularity = (newGran) => {
     setGranularity(newGran);
     history.push('/' + newGran + '/' + moment(date).format(formats['day']));
   };
-  const granularitySelector = ['day', 'month', 'year'].map((o) => {
+  const granularitySelector = ['day', 'week', 'month', 'year'].map((o) => {
     return <Button key={o} onClick={() => chooseGranularity(o)} name={o}>View by {o}</Button>;
   });
   return (

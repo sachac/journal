@@ -32,7 +32,7 @@ const routes = [
   { path: '/photoEntries', name: 'With photos', component: PhotoDiary },
   { path: '/tag', name: 'Tag', component: TagView, routePath: '/tag/:tagParam?' },
   { path: '/zid', name: 'ZID', component: ZIDView, routePath: '/zid/:zidParam' },
-  { path: '/day', name: 'Day', component: DayView, routePath: '/:granularityParam(day|month|year)/:dateParam?' },
+  { path: '/day', name: 'Day', component: DayView, routePath: '/:granularityParam(day|week|month|year)/:dateParam?' },
   { path: '/onthisday', name: 'On this day', routePath: '/onthisday/:dateParam?', component: OnThisDay },
   { path: '/new', name: 'New', routePath: '/new/:dateParam?', component: EntryForm },
   { path: '/uncategorized', name: 'Uncategorized', component: Uncategorized },
