@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import history from "../history";
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
@@ -15,7 +16,6 @@ import moment from 'moment';
 import { makeStyles } from '@material-ui/core/styles';
 import { useParams } from "react-router-dom";
 import CategoryList from "../components/CategoryList";
-import { debounce } from 'throttle-debounce';
 import { objToQueryString } from '../App';
 
 const useStyles = makeStyles(theme => ({
@@ -34,7 +34,7 @@ function useEntryBehavior(props) {
   const splitEntry = async () => {
     let noteBodies = entry.Note.split(/\n+/);
     await noteBodies.reduce((prevPromise, cur) => {
-      return prevPromise.then((_) => {
+      return prevPromise.then(() => {
         return fetch('/api/entries', {
           method: 'POST',
           headers: {'Content-Type': 'application/json' },
@@ -45,7 +45,7 @@ function useEntryBehavior(props) {
       });
     }, Promise.resolve([])).then((res) => {
       setEntry({Note: '', Other: '', Category: '', Time: moment().format('HH:mm:ss'), Date: moment(entry.Date).format('YYYY-MM-DD')});
-      if (props.onSubmit) { props.onSubmit(res); };
+      if (props.onSubmit) { props.onSubmit(res); }
     });
   };
   const saveEntry = () => {
@@ -101,7 +101,7 @@ export function QuickEntryForm(props) {
   const [ entry, setEntry ] = useState(props.entry || {Category: '', Note: '', Other: '', Date: moment(props.date).toDate(), PictureList: props.selected});
   const [ message, setMessage ] = useState('');
   const onSubmit = function(res) {
-    return Promise.resolve(props.onSubmit ? props.onSubmit(res) : res).then(function(res) {
+    return Promise.resolve(props.onSubmit ? props.onSubmit(res) : res).then(function() {
       if (!entry.ID) {
         setEntry({Category: '', Note: '', Other: '', Date: moment(props.date).toDate(), PictureList: []});
       }
@@ -149,7 +149,12 @@ export function QuickEntryForm(props) {
     </Grid>
     </form>);
 }
-
+QuickEntryForm.propTypes = {
+    entry: PropTypes.object,
+    selected: PropTypes.array,
+    date: PropTypes.object,
+    onSubmit: PropTypes.func
+};
 
 function FormActions(props) {
   let id = props.id || (props.entry && props.entry.ID);
@@ -159,6 +164,13 @@ function FormActions(props) {
                      {id ? <Button className="delete" variant="contained" onClick={props.deleteEntry}>Delete</Button> : null}
                    </span>);
 }
+FormActions.propTypes = {
+    saveEntry: PropTypes.func,
+    splitEntry: PropTypes.func,
+    deleteEntry: PropTypes.func,
+    id: PropTypes.number,
+    entry: PropTypes.object
+};
 
 export function QuickSearchForRef(props) {
   const [ query, setQuery ] = useState(props.note);
@@ -178,7 +190,7 @@ export function QuickSearchForRef(props) {
         })); } );
     return false;
   };
-  useEffect((o) => {
+  useEffect(() => {
     if (props.other) {
       let m = props.other.match(/ref:[0-9]{4}-[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/g);
       if (m) {
@@ -196,6 +208,12 @@ export function QuickSearchForRef(props) {
             <EntryList entries={entries} onClick={props.onClick} selected={selected} options={{other: true}}/>
           </div>);
 }
+QuickSearchForRef.propTypes = {
+    onClick: PropTypes.func,
+    other: PropTypes.string,
+    note: PropTypes.string,
+    zid: PropTypes.string
+};
 
 export default function EntryForm(props) {
   const { idParam } = useParams();
@@ -297,3 +315,12 @@ export default function EntryForm(props) {
   }
 }
 
+EntryForm.propTypes = {
+    quick: PropTypes.bool,
+    entry: PropTypes.object,
+    ZIDString: PropTypes.string,
+    id: PropTypes.number,
+    date: PropTypes.object,
+    photos: PropTypes.array,
+    location: PropTypes.object,
+};

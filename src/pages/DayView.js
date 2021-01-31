@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import history from "../history";
+import PropTypes from 'prop-types';
 // import { HotKeys } from "react-hotkeys";
 import Button from '@material-ui/core/Button';
 import PhotoList from '../components/PhotoList';
 import { QuickEntryForm } from '../components/EntryForm';
-import DateSelector from '../components/DateSelector';
+import { DatePicker } from '@material-ui/pickers';
 import EntriesView from '../components/EntriesView';
 import BulkOperations, { SelectedInfo } from '../components/BulkOperations';
 import { Link, useParams } from "react-router-dom";
-import Grid from '@material-ui/core/Grid';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import moment from 'moment';
 // const keyMap = {
@@ -43,7 +43,7 @@ export function DayEntriesView(props) {
     }
   };
   
-  const handlePhotoDelete = (e) => {
+  const handlePhotoDelete = () => {
     if (selected.length === 0) return null;
     return Promise.all(selected.map((s) => {
       return fetch('/api/pictures/' + s, {
@@ -59,7 +59,7 @@ export function DayEntriesView(props) {
     setSelected([]);
     props.getData && props.getData();
   };
-  const OtherActions = (data) => {
+  const OtherActions = () => {
     if (selected.length === 0) return null;
     return <ButtonGroup>
                      <Button onClick={handlePhotoDelete}>Delete</Button>
@@ -69,15 +69,17 @@ export function DayEntriesView(props) {
                    </ButtonGroup>;
   };
 
-  const handleSameAsPrevious = (e) => {
+  const handleSameAsPrevious = () => {
     handleEntryClick(null, lastEntry);
   };
 
   
+
   let zoomPhotos = <div/>;
+  /*let zoomPhotos = <div/>;
   if (selected.length > 0) {
     zoomPhotos = <div className="large"><PhotoList onClick={handlePhotoClick} data={selected} selected={selected}/></div>;
-  }
+  }*/
 
   return (
     <div className={selected.length > 0 ? 'hasSelected' : ''}>
@@ -91,25 +93,54 @@ export function DayEntriesView(props) {
   );
 
 }
+DayEntriesView.propTypes = {
+    date: PropTypes.object,
+    getData: PropTypes.func,
+    onDone: PropTypes.func,
+    data: PropTypes.object
+};
 
 export default function DayView() {
-  const { dateParam } = useParams();
+  const { dateParam, granularityParam } = useParams();
   const [ data, setData ] = useState({});
   const [ date, setDate ] = useState(dateParam ? moment(dateParam).toDate() : new Date());
+  const [ granularity, setGranularity ] = useState(granularityParam || 'day');
+  const formats = {'day': 'YYYY-MM-DD', 'month': 'YYYY-MM', 'year': 'YYYY'};
+  useEffect(() => {
+    if (!dateParam) { setGranularity('day'); }
+    else if (dateParam.length == 7) { setGranularity('month'); }
+    else if (dateParam.length == 4) { setGranularity('year'); }
+    else { setGranularity('day'); }
+  }, [dateParam]);
   const onChange = date => {
     setDate(date);
-    history.push('/day/' + moment(date).format('YYYY-MM-DD'));
+    history.push('/' + granularity + '/' + date.format(formats[granularity]));
   };
-  useEffect(() => { getData(); }, [date]);
+  const previous = () => {
+    onChange(moment(date).subtract(1, granularity));
+  };
+  const next = () => { setDate(moment(date).add(1, granularity)); };
+  useEffect(() => { getData(); }, [date, granularity]);
   const getData = async() => {
-    return fetch('/api/date/' + moment(date).format('YYYY-MM-DD'))
+    return fetch('/api/date/' + moment(date).format(formats[granularity]))
       .then(res => res.json())
       .then(data => setData(data));
   };
+  const chooseGranularity = (newGran) => {
+    setGranularity(newGran);
+    history.push('/' + newGran + '/' + moment(date).format(formats['day']));
+  };
+  const granularitySelector = ['day', 'month', 'year'].map((o) => {
+    return <Button key={o} onClick={() => chooseGranularity(o)} name={o}>View by {o}</Button>;
+  });
   return (
     <div>
-      <Button color="inherit" component={Link} to={'/month/' + moment(date).format('YYYY-MM')}>View by month</Button>
-      <DateSelector value={date} onChange={onChange} />
+      {granularitySelector}
+      <div>
+        <Button onClick={previous}>&laquo;</Button>
+        <DatePicker value={date} onChange={onChange} format={formats[granularity]}/>
+        <Button onClick={next}>&raquo;</Button>
+      </div>
       <DayEntriesView date={date} data={data} getData={getData} onDone={getData} />
     </div>
   );

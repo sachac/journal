@@ -40,6 +40,7 @@ app.get('/api/date/:date', async (req, res) => { res.json(await dataLib.getDateD
 app.get('/api/photos', async (req, res) => { res.json(await dataLib.getPhotos(req.query)); });
 app.get('/api/entries', async (req, res) => { res.json(await dataLib.getEntries(req.query)); });
 app.get('/api/entries.csv', async (req, res) => { res.send(await dataLib.entriesAsCSV(req.query)); });
+app.get('/api/entries/tag/:tag', async (req, res) => { res.send(await dataLib.getEntries({...req.query, tag: req.params.tag})); });
 app.get('/api/entries/random', async (req, res) => { res.json(await dataLib.getRandom(req.query)); });
 app.get('/api/entries/uncategorized', async (req, res) => { res.json(await dataLib.getUncategorized(req.query)); });
 app.get('/api/entries/incomplete', async (req, res) => { res.json(await dataLib.getIncomplete(req.query)); });
@@ -130,6 +131,14 @@ app.post('/api/entries/tag/bulk', async (req, res) => {
   let note = req.body.note;
   if (!zids || !tags) { res.send(500); return null; }
   return dataLib.tagEntriesByZids(zids, tags, note).then((data) => res.json(data));
+});
+
+app.delete('/api/entries/tag/bulk', async (req, res) => {
+  let zids = req.body.zids;
+  let tags = req.body.tags;
+  let note = req.body.note;
+  if (!zids || !tags) { res.send(500); return null; }
+  return dataLib.untagEntriesByZids(zids, tags, note).then((data) => res.json(data));
 });
 
 app.post('/api/entries/link/bulk', async (req, res) => {

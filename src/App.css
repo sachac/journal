@@ -73,8 +73,7 @@ a:visited { color: lightblue }
 
 .entryItem.selected { border-left: 2px solid yellow; padding-left: 5px; }
 .thumbnail { height: 200px; margin: 5px }
-
 .horizontal-form { /* https://stackoverflow.com/questions/59869051/vertically-aligning-the-button-with-the-textfield-in-react-material-ui */
-  display: flex;
   align-items: baseline;
 }
+.horizontal-form input { min-width: 50px }

@@ -4,7 +4,7 @@ import EntriesView from '../components/EntriesView';
 import BulkOperations, { SelectedInfo } from '../components/BulkOperations';
 import useSelectEntries from '../hooks/useSelectEntries';
 
-export default function ZIDList(props) {
+export default function ZIDList() {
   const { zids } = useParams();
   const [ entries, setEntries ] = useState([]);
   const { selectedEntries, clickEntry, clearSelection, selectAll } = useSelectEntries({entries});

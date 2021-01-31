@@ -9,7 +9,7 @@ ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json /app/package.json
 COPY yarn.lock /app/yarn.lock
 RUN yarn install 
-RUN yarn global add react-scripts@3.4.3 nodemon
+RUN yarn global add react-scripts@4.0.1 nodemon
 COPY src/server.js src/data.js /app/src/
 COPY build /app/build
 USER www

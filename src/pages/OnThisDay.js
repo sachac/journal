@@ -5,7 +5,7 @@ import DateSelector from '../components/DateSelector';
 import moment from 'moment';
 import history from "../history";
 
-export default function OnThisDay(props) {
+export default function OnThisDay() {
   const { dateParam } = useParams();
   const [date, setDate] = useState(dateParam ? moment(dateParam).toDate() : new Date());
   const [data, setData] = useState({});

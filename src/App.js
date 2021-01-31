@@ -8,7 +8,6 @@ import {
 
 import './App.css';
 import DayView from './pages/DayView';
-import MonthView from './pages/MonthView';
 import EntryForm from './components/EntryForm';
 import Entries from './pages/Entries';
 import Settings from './pages/Settings';
@@ -33,10 +32,9 @@ const routes = [
   { path: '/photoEntries', name: 'With photos', component: PhotoDiary },
   { path: '/tag', name: 'Tag', component: TagView, routePath: '/tag/:tagParam?' },
   { path: '/zid', name: 'ZID', component: ZIDView, routePath: '/zid/:zidParam' },
-  { path: '/day', name: 'Day', component: DayView, routePath: '/day/:dateParam?' },
-  { path: '/month', name: 'Month', component: MonthView, routePath: '/month/:dateParam?' },
-  { path: '/new', name: 'New', routePath: '/new/:dateParam?', component: EntryForm },
+  { path: '/day', name: 'Day', component: DayView, routePath: '/:granularityParam(day|month|year)/:dateParam?' },
   { path: '/onthisday', name: 'On this day', routePath: '/onthisday/:dateParam?', component: OnThisDay },
+  { path: '/new', name: 'New', routePath: '/new/:dateParam?', component: EntryForm },
   { path: '/uncategorized', name: 'Uncategorized', component: Uncategorized },
   { path: '/incomplete', name: 'Incomplete', component: Incomplete },
   { path: '/changes', name: 'Changes', component: Changes },

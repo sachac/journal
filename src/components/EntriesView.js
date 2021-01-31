@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import PropTypes from 'prop-types';
 import EntryWall from './EntryWall';
 import EntryTree from './EntryTree';
 import Tabs from '@material-ui/core/Tabs';
@@ -13,7 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 
 
 import SimpleReactLightbox, { SRLWrapper } from "simple-react-lightbox";
-export function GalleryView(props) {
+export const GalleryView = (props = {}) => {
   let photos = [];
   if (props.entries) {
     photos = props.entries.reduce((prev, cur) => {
@@ -27,12 +28,16 @@ export function GalleryView(props) {
     }, []);
   }
   return <SimpleReactLightbox><SRLWrapper>{photos.map((o) => <img key={o.src} src={o.src} alt={o.alt} className="thumbnail" />)}</SRLWrapper></SimpleReactLightbox>;
-}
+};
+GalleryView.propTypes = {
+    entries: PropTypes.array
+};
 
-export default function EntriesView(data) {
+
+function EntriesView(data) {
   let entries;
   const [ entryList, setEntryList ] = useState(data.entries);
-  const [ options, setOptions ] = useState({other: true, images: true, private: true, filter: ''});
+  const [ options, setOptions ] = useState({other: true, images: true, private: true, filter: '', exclude: ''});
   const [ view, setView ] = useState(data.view || 'tree');
   const changeView = (event, newValue) => {
     setView(newValue);
@@ -43,7 +48,12 @@ export default function EntriesView(data) {
       filtered = filtered.filter((o) => !o.isPrivate);
     }
     if (options.filter) {
-      filtered = filtered.filter((o) => ([(o.Category || ''), (o.Note || ''), (o.Other || '')].join(' ')).match(new RegExp(options.filter, 'i')));
+      filtered = filtered.filter((o) => ([(o.Category || ''), (o.Note || ''), (o.Other || '')].join(' '))
+                                 .match(new RegExp(options.filter, 'i')));
+    }
+    if (options.exclude) {
+      filtered = filtered.filter((o) => !(([(o.Category || ''), (o.Note || ''), (o.Other || '')].join(' '))
+                                          .match(new RegExp(options.exclude, 'i'))));
     }
     return filtered;
   };
@@ -55,6 +65,7 @@ export default function EntriesView(data) {
     if (event.target.name === 'images') { setOptions({...options, images: event.target.checked}); }
     if (event.target.name === 'private') { setOptions({...options, private: event.target.checked}); }
     if (event.target.name === 'filter') { setOptions({...options, filter: event.target.value}); }
+    if (event.target.name === 'exclude') { setOptions({...options, exclude: event.target.value}); }
   };
   if (view === 'cards') {
     entries = <EntryWall {...data} entries={entryList} options={options} includeDate={true} />;
@@ -66,12 +77,19 @@ export default function EntriesView(data) {
     entries = <EntryTree {...data} entries={entryList} options={options} sort="date" />;
   }
   const handleClearFilter = () => { setOptions({...options, filter: ''}); };
+  const handleClearExclude = () => { setOptions({...options, exclude: ''}); };
   
   return (<div>
             <FormGroup row className="horizontal-form">
               <TextField label="Filter" value={options.filter || ''} onChange={handleChange} name="filter" InputProps={{
                 endAdornment: <InputAdornment position="end">
                                 <IconButton onClick={handleClearFilter} style={{order: 1}}>
+                                  <ClearIcon color="disabled" fontSize="small" />
+                                </IconButton>
+                              </InputAdornment>}}/>
+              <TextField label="Exclude" value={options.exclude || ''} onChange={handleChange} name="exclude" InputProps={{
+                endAdornment: <InputAdornment position="end">
+                                <IconButton onClick={handleClearExclude} style={{order: 1}}>
                                   <ClearIcon color="disabled" fontSize="small" />
                                 </IconButton>
                               </InputAdornment>}}/>
@@ -88,3 +106,8 @@ export default function EntriesView(data) {
             {entries}
           </div>);
 }
+
+EntriesView.propTypes = {
+    entries: PropTypes.array,
+};
+export default EntriesView;

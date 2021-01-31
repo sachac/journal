@@ -4,11 +4,11 @@ import { useParams } from "react-router-dom";
 import BulkOperations, { SelectedInfo } from '../components/BulkOperations';
 import useSelectEntries from '../hooks/useSelectEntries';
 
-export default function TagView(data) {
+export default function TagView() {
   const [entries, setEntries] = useState([]);
   const {tagParam} = useParams();
   const fetchData = () => {
-    fetch(`/api/entries?q=` + encodeURIComponent('#' + tagParam) + '&regex=1')
+    fetch('/api/entries/tag/' + encodeURIComponent(tagParam))
       .then(res => res.json())
       .then(setEntries);
     return null;
