@@ -17,15 +17,15 @@ function Photo(data) {
     if (typeof data.photo == 'string') {
         return <img loading="lazy" onClick={(e) => handleClick(e, data.photo)} alt={data.photo}
                     className={classes[data.isSelected ? 'selected' : 'img']}
-                    data-filename={data.photo} src={'/thumbnails/' + data.photo} />;
+                    data-filename={data.photo} src={'/thumbnails/' + encodeURIComponent(data.photo)} />;
     } else if (Array.isArray(data.photo)) {
         return <img loading="lazy" onClick={(e) => handleClick(e, data.photo[0])} alt={data.photo[0]}
                     className={classes[data.isSelected ? 'selected' : 'img']}
-                    data-filename={data.photo[0]} src={'/thumbnails/' + data.photo[0]} />;
+                    data-filename={data.photo[0]} src={'/thumbnails/' + encodeURIComponent(data.photo[0])} />;
     } else {
         return <img loading="lazy" onClick={(e) => handleClick(e, data.photo.filename)} alt={data.photo.filename}
                     className={classes[data.isSelected ? 'selected' : 'img']}
-                    data-filename={data.photo.filename} src={'/thumbnails/' + data.photo.filename} />;
+                    data-filename={data.photo.filename} src={'/thumbnails/' + encodeURIComponent(data.photo.filename)} />;
     }
 }
 

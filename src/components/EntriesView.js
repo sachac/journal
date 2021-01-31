@@ -20,7 +20,7 @@ export const GalleryView = (props = {}) => {
     photos = props.entries.reduce((prev, cur) => {
       if (cur.PictureList) {
         prev = prev.concat([...new Set(cur.PictureList)].map((o) => { return {
-          src: '/thumbnails/' + o,
+          src: '/thumbnails/' + encodeURIComponent(o),
           width: 1,
           alt: cur.ZIDString + ': ' + cur.Note + ' (' + o + ')'}; }));
       }
