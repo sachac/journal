@@ -19,7 +19,7 @@ import useSelectEntries from '../hooks/useSelectEntries';
 // };
 
 // https://stackoverflow.com/questions/37230555/get-with-query-string-with-fetch-in-react-native
-const queryString = require('query-string');
+import queryString from 'query-string';
 export default function Search(props) {
   const [ message, setMessage ] = useState('');
   const parsed = queryString.parse(props.location && props.location.search);

@@ -57,6 +57,7 @@ function useEntryBehavior(props) {
       }).then((res) => res.json())
         .then((res) => {
           setEntry(res);
+          props.setMessage && props.resetMessage(`Updated ${res.ZIDString}: ${res.Note}`);
           if (props.onSubmit) { props.onSubmit(res); }
         });
     } else {
@@ -64,9 +65,10 @@ function useEntryBehavior(props) {
         method: 'POST',
         headers: {'Content-Type': 'application/json' },
         body: JSON.stringify(entry)
-      }).then((res) => {
+      }).then((res) => res.json()).then((res) => {
         // After creating a new entry, clear the items and update the list of entries for the day
         setEntry({Note: '', Other: '', Category: '', Time: moment().format('HH:mm:ss'), Date: moment(entry.Date).format('YYYY-MM-DD')});
+        props.setMessage && props.setMessage(`Created ${res.ZIDString}: ${res.Note}`);
         if (props.onSubmit) { props.onSubmit(res); }
       });
     }
@@ -80,7 +82,12 @@ function useEntryBehavior(props) {
     }
   };
   const handleChange = event => {
-    if (event.target.name === 'note') setEntry({...entry, Note: event.target.value});
+    if (event.target.name === 'note') {
+      setEntry({...entry, Note: event.target.value});
+      if (event.target.value.match(/^I thought/)) {
+        setEntry({...entry, Category: 'Thoughts', Note: event.target.value});
+      }
+    }
     if (event.target.name === 'category') setEntry({...entry, Category: event.target.value});
     if (event.target.name === 'other') setEntry({...entry, Other: event.target.value});
     if (event.target.name === 'time') {
@@ -115,7 +122,7 @@ export function QuickEntryForm(props) {
   const deselectPhoto = (e, p) => {
     setEntry({...entry, PictureList: (entry.PictureList || []).filter(d => d !== p)});
   };
-  const { handleKey, saveEntry, splitEntry, deleteEntry, handleChange } = useEntryBehavior({entry, setEntry, setMessage, onSubmit: onSubmit});
+  const { handleKey, saveEntry, splitEntry, deleteEntry, handleChange } = useEntryBehavior({entry: entry, setEntry, setMessage, onSubmit: onSubmit});
   useEffect(() => { if (props.entry) setEntry(props.entry); }, [props.entry]);
   useEffect(() => { if (props.date && !entry.ID) setEntry({...entry, Date: moment(props.date).toDate()}); }, [props.date]);
   useEffect(() => { if (props.selected && !entry.ID) {
@@ -135,11 +142,11 @@ export function QuickEntryForm(props) {
     <form className={classes.root} noValidate onSubmit={saveEntry}>
     <Grid container>
       <Grid item xs={12} sm={6}>
-        <TextField label="Note" multiline name='note' value={entry.Note} onChange={handleChange} autoFocus className={classes.note} />
-        <TextField label="Other" multiline name='other' value={entry.Other} onChange={handleChange} className={classes.note} />
+        <TextField label="Note" multiline name='note' value={entry.Note} onChange={handleChange} autoFocus className={classes.note} onKeyPress={handleKey} />
+        <TextField label="Other" multiline name='other' value={entry.Other} onChange={handleChange} className={classes.note} onKeyPress={handleKey} />
         <CategoryList value={entry.Category} onChange={handleChange} onKeyPress={handleKey} />
         <DateSelector value={moment(entry.Date).toDate()} onChange={setDate} />
-        <FormActions saveEntry={saveEntry} splitEntry={splitEntry} deleteEntry={deleteEntry} id={entry && entry.ID} />
+      <FormActions saveEntry={saveEntry} splitEntry={splitEntry} deleteEntry={deleteEntry} id={entry && entry.ID} />
         <Link to={"/entries/" + (props.entry && props.entry.ID ? props.entry.ID : 'new')}>Full form</Link> {message}
         <QuickSearchForRef zid={entry.ZIDString} onClick={linkEntryWhileEditing} />
       </Grid>
@@ -158,11 +165,11 @@ QuickEntryForm.propTypes = {
 
 function FormActions(props) {
   let id = props.id || (props.entry && props.entry.ID);
-  return (<span>
+  return (<div>
                      <Button className="save" variant="contained" color="primary" onClick={props.saveEntry}>Save</Button>
                      <Button className="split" variant="contained" onClick={props.splitEntry}>Split</Button>
                      {id ? <Button className="delete" variant="contained" onClick={props.deleteEntry}>Delete</Button> : null}
-                   </span>);
+                   </div>);
 }
 FormActions.propTypes = {
     saveEntry: PropTypes.func,
@@ -215,49 +222,47 @@ QuickSearchForRef.propTypes = {
     zid: PropTypes.string
 };
 
-export default function EntryForm(props) {
+import queryString from 'query-string';
+
+export default function EntryForm({date=new Date(), photos=[], location=null, id=null, entry=null, ZIDString=null, quick=false}) {
   const { idParam } = useParams();
-  const queryString = require('query-string');
-  const parsed = queryString.parse(props.location && props.location.search);
+  const parsed = queryString.parse(location && location.search);
   const [dateData, setDateData] = useState({});
-  const [quick, setQuick] = useState(parsed.quick);
-  const [entry, setEntry] = useState({Note: '',
+  const [formEntry, setEntry] = useState({Note: '',
                                       Other: '',
-                                      PictureList: props.photos || (parsed.filename ? [parsed.filename] : []),
-                                      Date: props.date,
-                                      Time: moment(props.Date).format('HH:mm:ss'),
+                                      PictureList: photos.length > 0 ? photos : (parsed.filename ? [parsed.filename] : []),
+                                      Date: date,
+                                      Time: moment(date).format('HH:mm:ss'),
                                       Category: ''});
   useEffect(() => {
-    setEntry({...entry, ...__.pick(parsed, ['Note', 'Other', 'Category']) });
+    setEntry({...formEntry, ...__.pick(parsed, ['Note', 'Other', 'Category']) });
   }, []);
   useEffect(() => {
-    if (quick && entry && entry.Note) {
+    if (quick && formEntry && formEntry.Note) {
       saveEntry();
-      setQuick(false);
-      console.log(entry);
       history.push('/new');
     }
-  }, [entry]);
+  }, [formEntry]);
   const [message, setMessage] = useState('');
   
-  const { saveEntry, splitEntry, deleteEntry, handleChange, handleKey } = useEntryBehavior({entry, setEntry, setMessage});
+  const { saveEntry, splitEntry, deleteEntry, handleChange, handleKey } = useEntryBehavior({entry: formEntry, setEntry, setMessage});
   //useEffect(() => { if (props.date && (entry.Date != props.date)) setEntry({...entry, Date: props.date}); }, [props.date]);
   //useEffect(() => { if (props.photos) setEntry({...entry, PictureList: props.photos}); }, [props.photos]);
   useEffect(() => {
     if (idParam) fetchEntry(idParam);
-    else if (props.id) fetchEntry(props.id);
-  }, [idParam, props.id]);
-  useEffect(() => { if (props.entry) setEntry(props.entry); }, [props.entry]);
+    else if (id) fetchEntry(id);
+  }, [idParam, id]);
+  useEffect(() => { if (entry) setEntry(entry); }, [entry]);
   const fetchEntryByZID = (id) => {
     fetch('/api/entries?zid=' + id)
       .then((res) => res.json())
       .then((data) => { data && data[0] && setEntry(data[0]); });
   };
   useEffect(() => {
-    if (props.ZIDString) {
-      fetchEntryByZID(props.ZIDString); 
+    if (ZIDString) {
+      fetchEntryByZID(ZIDString);
     }
-  }, [props.ZIDString]);
+  }, [ZIDString]);
   
   const fetchEntry = (id) => {
     fetch('/api/entries/' + id)
@@ -265,50 +270,52 @@ export default function EntryForm(props) {
       .then((data) => { setEntry(data); });
   };
   const fetchDataForTheDay = () => {
-    fetch('/api/date/' + moment(entry.Date).format('YYYY-MM-DD'))
+    fetch('/api/date/' + moment(formEntry?.Date || entry?.Date).format('YYYY-MM-DD'))
       .then((res) => res.json())
       .then((data) => setDateData(data));
   };
   const onClickRef = (event, ref) => {
     if (!entry.Other.match('ref:' + ref.ZIDString)) {
-      setEntry({...entry, Other: (entry.Other || '') + "\nref:" + ref.ZIDString});
+      setEntry({...formEntry, Other: (formEntry.Other || '') + "\nref:" + ref.ZIDString});
     }
   };
 
   const setDate = (date) => {
-    setEntry({...entry, Date: date});
+    setEntry({...formEntry, Date: date});
   };
   
-  useEffect(fetchDataForTheDay, [entry.Date]);
+  useEffect(fetchDataForTheDay, [formEntry.Date]);
   const classes = useStyles();
   const selectPhoto = (e, p) => {
-    if (!entry.PictureList || !entry.PictureList.includes(p)) {
-      setEntry({...entry, PictureList: [...(entry.PictureList || []), p]});
+    if (!formEntry.PictureList || !formEntry.PictureList.includes(p)) {
+      setEntry({...formEntry, PictureList: [...(formEntry.PictureList || []), p]});
     }
   };
   const deselectPhoto = (e, p) => {
-    setEntry({...entry, PictureList: (entry.PictureList || []).filter(d => d !== p)});
+    setEntry({...formEntry, PictureList: (entry.PictureList || []).filter(d => d !== p)});
   };
-  const unlinkedPhotos = dateData && dateData.unlinkedPhotos && dateData.unlinkedPhotos.filter(d => !(entry.PictureList || []).includes(d.filename));
-  let actions = <FormActions saveEntry={saveEntry} splitEntry={splitEntry} deleteEntry={deleteEntry} id={entry.ID}/>;
-  if (props.quick) {
-    return <QuickEntryForm entry={entry}/>;
+  const unlinkedPhotos = dateData && dateData.unlinkedPhotos && dateData.unlinkedPhotos.filter(d => !(formEntry.PictureList || []).includes(d.filename));
+  let actions = <FormActions saveEntry={saveEntry} splitEntry={splitEntry} deleteEntry={deleteEntry} id={formEntry.ID}/>;
+  if (quick) {
+    return <QuickEntryForm entry={formEntry}/>;
   } else {
     return (
       <div>
         {message}
+        <DateSelector value={moment(formEntry.Date).toDate()} onChange={setDate} />
         <form className={classes.root} noValidate onSubmit={saveEntry}>
-          {entry && entry.ZIDString ? <Link to={"/zid/" + entry.ZIDString}>{entry.ZIDString}</Link> : 'New'} {actions}
-          <TextField label="Note" multiline name='note' value={entry.Note || ''} onChange={handleChange} autoFocus className={classes.note} />
-          <TextField label="Other" multiline name='other' value={entry.Other || ''} onChange={handleChange} className={classes.note} />
-          <CategoryList value={entry.Category || ''} onChange={handleChange} onKeyPress={handleKey} />
-          <TextField label="Time" value={entry.Time || ''} onChange={handleChange} name="time" />
-          <PhotoList data={entry.PictureList || []} onClick={deselectPhoto}/>         
-          <PhotoList data={unlinkedPhotos || []} onClick={selectPhoto}/>            
+          {formEntry && formEntry.ZIDString ? <Link to={"/zid/" + formEntry.ZIDString}>{formEntry.ZIDString}</Link> : 'New'}
+          <TextField label="Note" multiline name='note' value={formEntry.Note || ''} onChange={handleChange} autoFocus className={classes.note} />
+          <TextField label="Other" multiline name='other' value={formEntry.Other || ''} onChange={handleChange} className={classes.note} />
+          <CategoryList value={formEntry.Category || ''} onChange={handleChange} onKeyPress={handleKey} />
+          <TextField label="Time" value={formEntry.Time || ''} onChange={handleChange} name="time" />
           {actions}
+          <PhotoList data={formEntry.PictureList || []} onClick={deselectPhoto}/>
+          <PhotoList data={unlinkedPhotos || []} onClick={selectPhoto}/>            
+          {(formEntry.PictureList?.length || 0 + unlinkedPhotos?.length || 0) > 3 ? actions : ''}
         </form>
         <QuickSearchForRef onClick={onClickRef} />
-        <DateSelector value={moment(entry.Date).toDate()} onChange={setDate} />
+        <DateSelector value={moment(formEntry.Date).toDate()} onChange={setDate} />
         <EntryTree entries={dateData && dateData.entries} options={{other: true}}/>
       </div>
     );

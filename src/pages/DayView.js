@@ -86,6 +86,7 @@ export function DayEntriesView(props) {
       <PhotoList scroll onDelete={handlePhotoDelete} onClick={handlePhotoClick} data={props.data.unlinkedPhotos} selected={selected} />
       <OtherActions selected={selected}/>
       <EntriesView entries={props.data.entries} onClick={handleEntryClick} selected={selectedEntries} />
+      <BulkOperations entries={entries} selected={selectedEntries} onDone={props.onDone} onClear={clearSelection} onSelectAll={selectAll}/>
       <QuickEntryForm selected={selected} date={props.date} onSubmit={onQuickEntry} photos={selected} />
       <SelectedInfo entries={entries} selected={selectedEntries} />
     </div>
@@ -122,7 +123,6 @@ export default function DayView() {
   useEffect(() => { getData(); }, [date, granularity]);
   const getData = async() => {
     if (granularity == 'week') {
-      let d = moment(date);
       let start = (moment(date).day() == 6) ? moment(date) : moment(date).subtract(moment(date).day() + 1, 'day');
       let url = '/api/entries?from=' + start.format(formats['day'])
           + '&to=' + moment(start).add(1, 'week').format(formats['day']);
@@ -152,13 +152,18 @@ export default function DayView() {
   });
   return (
     <div>
-      {granularitySelector}
+			{granularitySelector}
       <div>
         <Button onClick={previous}>&laquo;</Button>
         <DatePicker value={date} onChange={onChange} format={formats[granularity]}/>
         <Button onClick={next}>&raquo;</Button>
       </div>
       <DayEntriesView date={date} data={data} getData={getData} onDone={getData} />
+      <div>
+        <Button onClick={previous}>&laquo;</Button>
+        <DatePicker value={date} onChange={onChange} format={formats[granularity]}/>
+        <Button onClick={next}>&raquo;</Button>
+				</div>
     </div>
   );
 }

@@ -7,13 +7,20 @@ const parse = require('csv-parse');
 const bodyParser = require('body-parser');
 const moment = require('moment');
 const dataLib = require('./data');
-
+const fs = require('fs');
 // Serve the static files from the React app
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../build')));
+console.debug('serving', path.join(__dirname, '../build/'));
+app.use(express.static(path.join(__dirname, '../build/')));
 
-app.use('/thumbnails', express.static(process.env.THUMBNAILS_DIR));
-dataLib.imageDirs.forEach((dir) => app.use('/thumbnails', express.static(dir)));
+if (process.env.THUMBNAILS_DIR && fs.existsSync(process.env.THUMBNAILS_DIR)) {
+	app.use('/thumbnails', express.static(process.env.THUMBNAILS_DIR));
+}
+dataLib.imageDirs.forEach((dir) => {
+	if (dir && fs.existsSync(dir)) {
+		app.use('/thumbnails', express.static(dir));
+	}
+});
 app.get('/thumbnails/:filename', async(req, res) => {
   let f = await dataLib.findOriginalPicture(req.params.filename);
   if (f) {
@@ -40,6 +47,7 @@ app.get('/api/date/:date', async (req, res) => { res.json(await dataLib.getDateD
 app.get('/api/photos', async (req, res) => { res.json(await dataLib.getPhotos(req.query)); });
 app.get('/api/entries', async (req, res) => { res.json(await dataLib.getEntries(req.query)); });
 app.get('/api/entries.csv', async (req, res) => { res.send(await dataLib.entriesAsCSV(req.query)); });
+app.get('/api/entries.org', async (req, res) => { res.send(await dataLib.entriesAsOrg(req.query)); });
 app.get('/api/entries/tag/:tag', async (req, res) => { res.send(await dataLib.getEntries({...req.query, tag: req.params.tag})); });
 app.get('/api/entries/random', async (req, res) => { res.json(await dataLib.getRandom(req.query)); });
 app.get('/api/entries/uncategorized', async (req, res) => { res.json(await dataLib.getUncategorized(req.query)); });
@@ -83,10 +91,14 @@ app.post('/api/makeThumbs', async (req, res) => {
 });
 
 app.put('/api/entries/:id', async (req, res) => {
-  var e = await dataLib.getEntryByID(req.body.ID || req.params.id);
-  let result = await dataLib.updateEntry(e, req.body);
-  if (!e) { res.sendStatus(404); }
-  else { res.json(result); }
+  var e = await dataLib.getEntryByID(req.body.ID || req.params.id || req.body.ZIDString);
+  let result;
+  if (!e) {
+    result = await dataLib.createEntry(req.body);
+  } else {
+    result = await dataLib.updateEntry(e, req.body);
+  }
+  res.json(result);
 });
 
 app.delete('/api/entries/:id', async (req, res) => {

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const fs = require('fs').promises;
 const process = require('process');
-const stringify = require('csv-stringify/lib/sync');
+const stringify = require('csv-stringify');
 const columns = ["Note","Category","Pictures","Date","highlight week","Time","Link","ID","Status","Other", "ZID", "ZIDString"];
 const path = require('path');
 const moment = require('moment');
@@ -206,6 +206,11 @@ module.exports.deletePicture = deletePicture;
 
 async function maybeAddImages(oldList, directory, filter) {
   if (!directory) { return oldList; }
+	try {
+		await fs.access(directory, fs.constants.R_OK);
+	} catch (e) {
+		return oldList;
+	}
   let list = await fs.readdir(directory);
   list = list.filter((f) => f.match(/\.(jpg|png)$/i));
   list = list.filter((f) => {
@@ -369,6 +374,24 @@ async function writeCSV() {
 }
 
 
+async function entriesAsOrg(params) {
+  let entries = await getEntries(params);
+  
+  return entries.map((o) => {
+    let m = o.Note.match(/^([^\n]+)(\n[.\n]+)?/);
+    let tags = o.Other.match(/(?:^|[ \n])#[^ \n]+/g);
+    return `* ${m && m[1] ? m[1] : o.Note}${tags ? ":" + tags.join(":") + ":" : ""}
+:PROPERTIES:
+:JOURNAL_CAT: ${o.Category}
+:JOURNAL_ZID: ${o.ZIDString}
+:END:
+${m && m[2] ? "\n\n" + m[2] : ""}${o.Other ? "\n\n#+BEGIN_COMMENT\n" + o.Other.replace(/ref:[^ ]/g, '[[\1]]')  + "\n#+END_COMMENT\n" : ""}${o.PictureList && o.PictureList.length > 0 ? "\n\n" + o.PictureList.map((p) => `[[image:${p}]]`).join("\n") + "\n" : ""}
+[${(new moment(o.Date)).format("YYYY-MM-DD ddd HH:mm")}]
+`;
+  }).join("\n");
+}
+module.exports.entriesAsOrg = entriesAsOrg;
+
 async function entriesAsCSV(params) {
   return fastCsv.writeToString(await getEntries(params), {columns: columns, transform: csvTransformer, headers: columns, writeHeaders: true});
 }
@@ -403,7 +426,11 @@ function getEntryByZID(zidString) {
 module.exports.getEntryByZID = getEntryByZID;
 
 function getEntryByID(id) {
-  return Entry.findOne({ID: id}).exec();
+  if (('' + id).match('-')) {
+    return getEntryByZID(id);
+  } else {
+    return Entry.findOne({ID: id}).exec();
+  }
 }
 module.exports.getEntryByID = getEntryByID;
 
@@ -680,8 +707,10 @@ async function createEntry(e) {
   e.PictureList = [...new Set(e.PictureList)];
   e.Pictures = e.PictureList.join(',');
   let newEntry = new Entry(e);
-  newEntry.ZID = await getNextZID(newEntry);
-  newEntry.ZIDString = formatZIDString(newEntry);
+  if (!newEntry.ZIDString) {
+    newEntry.ZID = await getNextZID(newEntry);
+    newEntry.ZIDString = formatZIDString(newEntry);
+  }
   await newEntry.save();
   if (e.PictureList) {
     await Promise.all(e.PictureList.map(makeThumbnail));
@@ -723,8 +752,8 @@ async function importEntriesIntoDB(entries) {
 }
 
 function connect() {
-  return mongoose
-    .connect(process.env.MONGODB, { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true });
+  return mongoose.set('strictQuery', false)
+    .connect(process.env.MONGODB, { useNewUrlParser: true, /* useFindAndModify: false, */ useUnifiedTopology: true });
 }
 
 module.exports.connect = connect;

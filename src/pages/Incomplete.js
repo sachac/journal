@@ -10,6 +10,6 @@ export default function Incomplete() {
             .then(entries => { setData(entries[0]); });
     };
     useEffect(getEntry, []);
-  return data ? <EntryForm entry={data} onSubmit={getEntry} /> : <div>All good!</div>;
+  return data ? <EntryForm date={new Date()} entry={data} onSubmit={getEntry} /> : <div>All good!</div>;
 }
 

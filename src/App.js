@@ -1,8 +1,7 @@
 import React from 'react';
-import history from "./history";
 import {
   BrowserRouter as Router,
-  Switch,
+  Routes,
   Route
 } from "react-router-dom";
 
@@ -24,23 +23,23 @@ import Uncategorized from './pages/Uncategorized';
 import Incomplete from './pages/Incomplete';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/moment';
-import { ThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles';
+import { ThemeProvider, createTheme, makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 const routes = [
-  { path: '/', name: 'Random', component: Random, exact: true },
-  { path: '/photoEntries', name: 'With photos', component: PhotoDiary },
-  { path: '/tag', name: 'Tag', component: TagView, routePath: '/tag/:tagParam?' },
-  { path: '/zid', name: 'ZID', component: ZIDView, routePath: '/zid/:zidParam' },
-  { path: '/day', name: 'Day', component: DayView, routePath: '/:granularityParam(day|week|month|year)/:dateParam?' },
-  { path: '/onthisday', name: 'On this day', routePath: '/onthisday/:dateParam?', component: OnThisDay },
-  { path: '/new', name: 'New', routePath: '/new/:dateParam?', component: EntryForm },
-  { path: '/uncategorized', name: 'Uncategorized', component: Uncategorized },
-  { path: '/incomplete', name: 'Incomplete', component: Incomplete },
-  { path: '/changes', name: 'Changes', component: Changes },
-  { path: '/search', name: 'Search', component: Search },
-  { path: '/entries', name: 'Entries', component: Entries, exact: true },
-  { path: '/settings', name: 'Settings', component: Settings }
+  { path: '/', name: 'Random', component: <Random />, exact: true },
+  { path: '/photoEntries', name: 'With photos', component: <PhotoDiary /> },
+  { path: '/tag', name: 'Tag', component: <TagView />, routePath: '/tag/:tagParam?' },
+  { path: '/zid', name: 'ZID', component: <ZIDView />, routePath: '/zid/:zidParam' },
+  { path: '/day', name: 'Day', component: <DayView/>, routePath: 'day/:dateParam?' },
+  { path: '/onthisday', name: 'On this day', routePath: '/onthisday/:dateParam?', component: <OnThisDay /> },
+  { path: '/new', name: 'New', routePath: '/new/:dateParam?', component: <EntryForm date={new Date()}/> },
+  { path: '/uncategorized', name: 'Uncategorized', component: <Uncategorized /> },
+  { path: '/incomplete', name: 'Incomplete', component: <Incomplete /> },
+  { path: '/changes', name: 'Changes', component: <Changes /> },
+  { path: '/search', name: 'Search', component: <Search /> },
+  { path: '/entries', name: 'Entries', component: <Entries />, exact: true },
+  { path: '/settings', name: 'Settings', component: <Settings /> }
 ];
 
 // theme = responsiveFontSizes(theme);
@@ -57,7 +56,7 @@ const useStyles = makeStyles(theme => ({
 export default function App() {
   const classes = useStyles();
   const [themePreference, setThemePreference] = React.useState('dark');
-  const theme = createMuiTheme({
+  const theme = createTheme({
     palette: {type: themePreference},
     typography: {
       body2: {
@@ -71,21 +70,24 @@ export default function App() {
   };
   return (<ThemeProvider theme={theme}>
             <CssBaseline/>
-            <div className={classes.root}>
-              <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                <Router history={history}>
+          <div className={classes.root}>
+					<MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <Router>
                   <NavBar routes={routes} themePreference={themePreference} toggleTheme={toggleTheme} />
-                  <Switch>
+                  <Routes>
                     {routes.map((r, key) => {
                       if (r.exact) {
-                        return <Route key={key} exact path={r.routePath || r.path} component={r.component}></Route>; 
+                        return <Route key={key} path={r.routePath || r.path} element={r.component}></Route>;
                       } else {
-                        return <Route key={key} path={r.routePath || r.path} component={r.component}></Route>;
+                        return <Route key={key} path={r.routePath || r.path} element={r.component}></Route>;
                       }
                     })}
-                    <Route path="/zids/:zids" component={ZIDList} />
-                    <Route path="/entries/:idParam" component={EntryForm} />
-                  </Switch>
+          <Route path="zids/:zids" element={<ZIDList />}/>
+          <Route path="entries/:idParam" element={<EntryForm />}/>
+					<Route path="week/:dateParam" element={<DayView />}/>
+					<Route path="month/:dateParam" element={<DayView />}/>
+					<Route path="year/:dateParam" element={<DayView />}/>
+                  </Routes>
                 </Router>
               </MuiPickersUtilsProvider></div>
           </ThemeProvider>
